@@ -220,9 +220,10 @@ class Simon42ViewRoomStrategy {
           sensorEntities.motion.push(entityId);
           continue;
         }
-        // Präsenz
-        if (deviceClass === 'presence') {
+        // Präsenz/Belegung
+        if (deviceClass === 'occupancy' || deviceClass === 'presence') {
           sensorEntities.occupancy.push(entityId);
+          continue;
         }
       }
     }
@@ -357,34 +358,6 @@ class Simon42ViewRoomStrategy {
       });
     }
 
-    // Bewegung (zeige Badge nur wenn Bewegung erkannt)
-    const activeMotion = sensorEntities.motion.filter(id => {
-      const state = hass.states[id];
-      return state && state.state === 'on';
-    });
-    if (activeMotion.length > 0) {
-      badges.push({
-        type: "entity",
-        entity: activeMotion[0],
-        color: "yellow",
-        tap_action: { action: "more-info" }
-      });
-    }
-
-    // Präsenz (zeige Badge nur wenn Präsenz erkannt)
-    const activeOccupancy = sensorEntities.occupancy.filter(id => {
-      const state = hass.states[id];
-      return state && state.state === 'on';
-    });
-    if (activeOccupancy.length > 0) {
-      badges.push({
-        type: "entity",
-        entity: activeOccupancy[0],
-        color: "cyan",
-        tap_action: { action: "more-info" }
-      });
-    }
-
     // Helligkeit
     if (sensorEntities.illuminance.length > 0) {
       badges.push({
@@ -401,6 +374,26 @@ class Simon42ViewRoomStrategy {
         type: "entity",
         entity: sensorEntities.battery[0],
         color: "red",
+        tap_action: { action: "more-info" }
+      });
+    }
+
+    // Bewegung
+    if (sensorEntities.motion.length > 0) {
+      badges.push({
+        type: "entity",
+        entity: sensorEntities.motion[0],
+        color: "yellow",
+        tap_action: { action: "more-info" }
+      });
+    }
+
+    // Präsenz/Belegung
+    if (sensorEntities.occupancy.length > 0) {
+      badges.push({
+        type: "entity",
+        entity: sensorEntities.occupancy[0],
+        color: "cyan",
         tap_action: { action: "more-info" }
       });
     }
