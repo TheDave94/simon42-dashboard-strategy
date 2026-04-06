@@ -110,6 +110,20 @@ class Simon42DashboardStrategy {
       ...createAreaViews(visibleAreas, devices, entities, showRoomViews, config.areas_options || {}, config)
     ];
 
+    // Custom Views anhängen (nach allen automatischen Views)
+    const customViews = config.custom_views || [];
+    for (const cv of customViews) {
+      if (cv.parsed_config && cv.title && cv.path) {
+        views.push({
+          ...cv.parsed_config,
+          // Title/Path/Icon aus den Editor-Feldern haben Vorrang über YAML-Inhalte
+          title: cv.title,
+          path: cv.path,
+          icon: cv.icon || 'mdi:card-text-outline'
+        });
+      }
+    }
+
     return {
       title: "Dynamisches Dashboard",
       views

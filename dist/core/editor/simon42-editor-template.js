@@ -3,7 +3,7 @@
 // ====================================================================
 // HTML-Template für den Dashboard Strategy Editor
 
-export function renderEditorHTML({ allAreas, hiddenAreas, areaOrder, showEnergy, showWeather, showSummaryViews, showRoomViews, showSearchCard, hasSearchCardDeps, summariesColumns, alarmEntity, alarmEntities, favoriteEntities, roomPinEntities, allEntities, groupByFloors, showCoversSummary, hideMobileAppBatteries, showLocksInRooms }) {
+export function renderEditorHTML({ allAreas, hiddenAreas, areaOrder, showEnergy, showWeather, showSummaryViews, showRoomViews, showSearchCard, hasSearchCardDeps, summariesColumns, alarmEntity, alarmEntities, favoriteEntities, roomPinEntities, allEntities, groupByFloors, showCoversSummary, hideMobileAppBatteries, showLocksInRooms, customViews }) {
   return `
     <div class="card-config">
       <div class="section">
@@ -220,6 +220,19 @@ export function renderEditorHTML({ allAreas, hiddenAreas, areaOrder, showEnergy,
       </div>
 
       <div class="section">
+        <div class="section-title">Custom Views</div>
+        <div id="custom-views-list">
+          ${renderCustomViewsList(customViews)}
+        </div>
+        <button id="add-custom-view-btn" style="margin-top: 8px; padding: 8px 16px; border-radius: 4px; border: 1px solid var(--divider-color); background: var(--primary-color); color: var(--text-primary-color); cursor: pointer;">
+          + Neue View hinzufügen
+        </button>
+        <div class="description">
+          Erstelle eigene Views mit beliebigen Cards. Tipp: Erstelle die View zuerst in einem normalen Dashboard, kopiere den YAML-Code und füge ihn hier ein.
+        </div>
+      </div>
+
+      <div class="section">
         <div class="section-title">Bereiche</div>
         <div class="description" style="margin-left: 0; margin-bottom: 12px;">
           Wähle aus, welche Bereiche im Dashboard angezeigt werden sollen und in welcher Reihenfolge. Klappe Bereiche auf, um einzelne Entitäten zu verwalten.
@@ -296,6 +309,41 @@ export function renderRoomPinsList(roomPinEntities, allEntities, allAreas) {
     </div>
   `;
 }
+
+function renderCustomViewsList(customViews) {
+  if (!customViews || customViews.length === 0) {
+    return '<div class="empty-state" style="padding: 12px; text-align: center; color: var(--secondary-text-color); font-style: italic;">Keine Custom Views erstellt</div>';
+  }
+
+  return customViews.map((view, index) => {
+    const yamlValid = view.parsed_config ? true : false;
+    const validationMsg = view._yaml_error
+      ? `<span style="color: var(--error-color);">❌ ${view._yaml_error}</span>`
+      : (view.yaml ? '<span style="color: var(--success-color, green);">✅ YAML gültig</span>' : '');
+
+    return `
+      <div class="custom-view-item" data-index="${index}" style="border: 1px solid var(--divider-color); border-radius: 8px; padding: 12px; margin-bottom: 12px; background: var(--card-background-color);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <strong style="font-size: 14px;">${view.title || 'Neue View'}</strong>
+          <button class="remove-custom-view-btn" data-index="${index}" style="padding: 4px 8px; border-radius: 4px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); cursor: pointer;">✕</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; gap: 8px;">
+            <input type="text" class="custom-view-title" data-index="${index}" value="${view.title || ''}" placeholder="Titel" style="flex: 2; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color);" />
+            <input type="text" class="custom-view-path" data-index="${index}" value="${view.path || ''}" placeholder="Pfad (z.B. mein-view)" style="flex: 2; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color);" />
+            <input type="text" class="custom-view-icon" data-index="${index}" value="${view.icon || ''}" placeholder="mdi:star" style="flex: 1; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color);" />
+          </div>
+          <textarea class="custom-view-yaml" data-index="${index}" rows="8" placeholder="YAML-Code hier einfügen..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color); font-family: monospace; font-size: 12px; resize: vertical; box-sizing: border-box;">${view.yaml || ''}</textarea>
+          <div class="custom-view-validation" data-index="${index}" style="font-size: 12px; min-height: 16px;">
+            ${validationMsg}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+export { renderCustomViewsList };
 
 function renderAreaItems(allAreas, hiddenAreas, areaOrder) {
   if (allAreas.length === 0) {

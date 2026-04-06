@@ -2,7 +2,7 @@
 // SIMON42 DASHBOARD STRATEGY - EDITOR
 // ====================================================================
 import { getEditorStyles } from './editor/simon42-editor-styles.js';
-import { renderEditorHTML } from './editor/simon42-editor-template.js';
+import { renderEditorHTML, renderCustomViewsList } from './editor/simon42-editor-template.js';
 import { 
   attachWeatherCheckboxListener,
   attachEnergyCheckboxListener,
@@ -73,6 +73,7 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
     const showCoversSummary = this._config.show_covers_summary !== false;
     const hideMobileAppBatteries = this._config.hide_mobile_app_batteries === true;
     const showLocksInRooms = this._config.show_locks_in_rooms === true;
+    const customViews = this._config.custom_views || [];
     const summariesColumns = this._config.summaries_columns || 2;
     const alarmEntity = this._config.alarm_entity || '';
     const favoriteEntities = this._config.favorite_entities || [];
@@ -123,7 +124,8 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
         groupByFloors,
         showCoversSummary,
         hideMobileAppBatteries,
-        showLocksInRooms
+        showLocksInRooms,
+        customViews
       })}
     `;
 
@@ -137,6 +139,7 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
     attachCoversSummaryCheckboxListener(this, (showCoversSummary) => this._showCoversSummaryChanged(showCoversSummary));
     attachHideMobileAppBatteriesCheckboxListener(this, (hide) => this._hideMobileAppBatteriesChanged(hide));
     attachShowLocksInRoomsCheckboxListener(this, (show) => this._showLocksInRoomsChanged(show));
+    this._attachCustomViewsListeners();
     this._attachSummariesColumnsListener();
     this._attachAlarmEntityListener();
     this._attachFavoritesListeners();
@@ -922,6 +925,140 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
     this._fireConfigChanged(newConfig);
   }
 
+  // === CUSTOM VIEWS ===
+
+  _attachCustomViewsListeners() {
+    // Add button
+    const addBtn = this.querySelector('#add-custom-view-btn');
+    if (addBtn) {
+      addBtn.addEventListener('click', () => this._addCustomView());
+    }
+
+    // Remove buttons
+    this.querySelectorAll('.remove-custom-view-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const index = parseInt(e.target.dataset.index);
+        this._removeCustomView(index);
+      });
+    });
+
+    // Title/Path/Icon inputs
+    this.querySelectorAll('.custom-view-title, .custom-view-path, .custom-view-icon').forEach(input => {
+      input.addEventListener('change', (e) => {
+        const index = parseInt(e.target.dataset.index);
+        const field = e.target.classList.contains('custom-view-title') ? 'title'
+          : e.target.classList.contains('custom-view-path') ? 'path' : 'icon';
+        this._updateCustomViewField(index, field, e.target.value);
+      });
+    });
+
+    // YAML textareas — parse on change
+    this.querySelectorAll('.custom-view-yaml').forEach(textarea => {
+      textarea.addEventListener('change', (e) => {
+        const index = parseInt(e.target.dataset.index);
+        this._updateCustomViewYaml(index, e.target.value);
+      });
+    });
+  }
+
+  _addCustomView() {
+    const customViews = [...(this._config.custom_views || [])];
+    customViews.push({
+      title: 'Neue View',
+      path: `custom-view-${customViews.length + 1}`,
+      icon: 'mdi:card-text-outline',
+      yaml: '',
+      parsed_config: null
+    });
+
+    const newConfig = { ...this._config, custom_views: customViews };
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+    this._updateCustomViewsList();
+  }
+
+  _removeCustomView(index) {
+    const customViews = [...(this._config.custom_views || [])];
+    customViews.splice(index, 1);
+
+    const newConfig = { ...this._config };
+    if (customViews.length === 0) {
+      delete newConfig.custom_views;
+    } else {
+      newConfig.custom_views = customViews;
+    }
+
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+    this._updateCustomViewsList();
+  }
+
+  _updateCustomViewField(index, field, value) {
+    const customViews = [...(this._config.custom_views || [])];
+    if (!customViews[index]) return;
+
+    customViews[index] = { ...customViews[index], [field]: value };
+
+    const newConfig = { ...this._config, custom_views: customViews };
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+  }
+
+  async _updateCustomViewYaml(index, yamlString) {
+    const customViews = [...(this._config.custom_views || [])];
+    if (!customViews[index]) return;
+
+    const updated = { ...customViews[index], yaml: yamlString };
+    delete updated._yaml_error;
+
+    if (yamlString.trim()) {
+      try {
+        // Dynamic import — js-yaml nur laden wenn nötig
+        if (!this._jsYaml) {
+          this._jsYaml = await import('../vendor/js-yaml.min.mjs');
+        }
+        const parsed = this._jsYaml.load(yamlString);
+        if (parsed && typeof parsed === 'object') {
+          updated.parsed_config = parsed;
+        } else {
+          updated._yaml_error = 'YAML muss ein Objekt ergeben';
+          updated.parsed_config = null;
+        }
+      } catch (e) {
+        updated._yaml_error = e.message?.split('\n')[0] || 'Ungültiges YAML';
+        updated.parsed_config = null;
+      }
+    } else {
+      updated.parsed_config = null;
+    }
+
+    customViews[index] = updated;
+
+    const newConfig = { ...this._config, custom_views: customViews };
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+
+    // Update nur die Validation-Anzeige, nicht die ganze Liste (sonst verliert man den Cursor)
+    const validationEl = this.querySelector(`.custom-view-validation[data-index="${index}"]`);
+    if (validationEl) {
+      if (updated._yaml_error) {
+        validationEl.innerHTML = `<span style="color: var(--error-color, red);">❌ ${updated._yaml_error}</span>`;
+      } else if (yamlString.trim()) {
+        validationEl.innerHTML = '<span style="color: var(--success-color, green);">✅ YAML gültig</span>';
+      } else {
+        validationEl.innerHTML = '';
+      }
+    }
+  }
+
+  _updateCustomViewsList() {
+    const container = this.querySelector('#custom-views-list');
+    if (container) {
+      container.innerHTML = renderCustomViewsList(this._config.custom_views || []);
+      this._attachCustomViewsListeners();
+    }
+  }
+
   _showLocksInRoomsChanged(show) {
     if (!this._config || !this._hass) {
       return;
@@ -944,10 +1081,20 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
   _fireConfigChanged(config) {
     // Setze Flag, damit setConfig() nicht erneut rendert
     this._isUpdatingConfig = true;
-    this._config = config;
-    
+
+    // Strip interne Felder aus custom_views vor dem Speichern
+    const cleanConfig = { ...config };
+    if (cleanConfig.custom_views) {
+      cleanConfig.custom_views = cleanConfig.custom_views.map(cv => {
+        const { _yaml_error, ...clean } = cv;
+        return clean;
+      });
+    }
+
+    this._config = cleanConfig;
+
     const event = new CustomEvent('config-changed', {
-      detail: { config },
+      detail: { config: cleanConfig },
       bubbles: true,
       composed: true
     });
