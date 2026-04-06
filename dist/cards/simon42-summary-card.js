@@ -97,35 +97,37 @@ class Simon42SummaryCard extends HTMLElement {
           
           // 4. Registry-Check - DIREKT aus hass.entities
           const registryEntry = hass.entities?.[id];
-          if (registryEntry?.hidden === true) return false;
-          
-          // 5. Category-Checks
-          if (state.attributes?.entity_category === 'config') return false;
-          if (state.attributes?.entity_category === 'diagnostic') return false;
-          
+          if (registryEntry?.hidden_by) return false;
+          if (registryEntry?.disabled_by) return false;
+
+          // 5. Category-Checks (aus Registry UND State-Attributes)
+          const category = registryEntry?.entity_category || state.attributes?.entity_category;
+          if (category === 'config' || category === 'diagnostic') return false;
+
           return true;
         });
-      
+
       case 'covers':
         return allEntityIds.filter(id => {
           // Domain-Check
           if (!id.startsWith('cover.')) return false;
-          
+
           // State-Check
           const state = hass.states[id];
           if (!state) return false;
-          
+
           // Exclude-Checks
           if (this._excludeLabelsSet.has(id)) return false;
           if (hiddenFromConfig.has(id)) return false;
-          
+
           // Registry-Check
           const registryEntry = hass.entities?.[id];
-          if (registryEntry?.hidden === true) return false;
-          
-          // Category-Checks
-          if (state.attributes?.entity_category === 'config') return false;
-          if (state.attributes?.entity_category === 'diagnostic') return false;
+          if (registryEntry?.hidden_by) return false;
+          if (registryEntry?.disabled_by) return false;
+
+          // Category-Checks (aus Registry UND State-Attributes)
+          const category = registryEntry?.entity_category || state.attributes?.entity_category;
+          if (category === 'config' || category === 'diagnostic') return false;
           
           return true;
         });
@@ -148,8 +150,13 @@ class Simon42SummaryCard extends HTMLElement {
           
           // Registry-Check
           const registryEntry = hass.entities?.[id];
-          if (registryEntry?.hidden === true) return false;
-          
+          if (registryEntry?.hidden_by) return false;
+          if (registryEntry?.disabled_by) return false;
+
+          // Category-Checks (aus Registry UND State-Attributes)
+          const category = registryEntry?.entity_category || state.attributes?.entity_category;
+          if (category === 'config' || category === 'diagnostic') return false;
+
           // Device-Class-Check nur für relevante Domains
           if (isLock) return true;
           
@@ -183,7 +190,8 @@ class Simon42SummaryCard extends HTMLElement {
           
           // Registry-Check
           const registryEntry = hass.entities?.[id];
-          if (registryEntry?.hidden === true) return false;
+          if (registryEntry?.hidden_by) return false;
+          if (registryEntry?.disabled_by) return false;
           
           return true;
         });
