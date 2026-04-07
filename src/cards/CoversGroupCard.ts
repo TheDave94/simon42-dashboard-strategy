@@ -1,7 +1,8 @@
 // ====================================================================
-// COVERS GROUP CARD — Reactive card for open/closed cover groups
+// COVERS GROUP CARD — Reactive card for open/closed cover groups (LitElement)
 // ====================================================================
 
+import { LitElement, html, css, nothing, type PropertyValues } from 'lit';
 import type { HomeAssistant } from '../types/homeassistant';
 import { Registry } from '../Registry';
 import { trackHassUpdate } from '../utils/debug';
@@ -30,12 +31,40 @@ const COVER_TERM_REGEXPS = COVER_TERMS.map(
 
 const DEFAULT_DEVICE_CLASSES = ['awning', 'blind', 'curtain', 'shade', 'shutter', 'window'];
 
-class Simon42CoversGroupCard extends HTMLElement {
+class Simon42CoversGroupCard extends LitElement {
+  static properties = {
+    _hass: { state: true },
+  };
+
   private _hass: HomeAssistant | null = null;
   private _config!: CoversGroupConfig;
   private _deviceClasses!: string[];
   private _cachedFilteredIds: Set<string> | null = null;
   private _lastCoversList = '';
+
+  // Reusable card pool
+  private _tileCards: Map<string, any> = new Map();
+  private _headingCard: any = null;
+
+  static styles = css`
+    :host {
+      display: block;
+    }
+    :host([hidden]) {
+      display: none;
+    }
+    .covers-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+    .cover-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 8px;
+    }
+  `;
 
   setConfig(config: CoversGroupConfig): void {
     if (!config.group_type) throw new Error('You need to define group_type (open/closed)');
@@ -46,13 +75,13 @@ class Simon42CoversGroupCard extends HTMLElement {
   set hass(hass: HomeAssistant) {
     trackHassUpdate('covers-group');
     const oldHass = this._hass;
-    this._hass = hass;
 
     if (!oldHass || oldHass.entities !== hass.entities) {
       this._cachedFilteredIds = null;
     }
 
-    if (oldHass && oldHass.states === hass.states) return;
+    // Skip if states unchanged — BUT only if we've successfully loaded once.
+    if (oldHass && oldHass.states === hass.states && this._cachedFilteredIds) return;
 
     // Fast path: only check cover entities for changes
     if (oldHass && this._cachedFilteredIds) {
@@ -60,64 +89,51 @@ class Simon42CoversGroupCard extends HTMLElement {
       for (const id of this._cachedFilteredIds) {
         if (oldHass.states[id] !== hass.states[id]) { hasChange = true; break; }
       }
-      if (!hasChange) return;
+      if (!hasChange) {
+        this._propagateHass(hass);
+        this._hass = hass;
+        return;
+      }
     }
 
     if (!this._cachedFilteredIds) {
-      this._cachedFilteredIds = new Set(this._getFilteredCoverEntities());
+      if (!Registry.initialized) {
+        this._hass = hass;
+        return;
+      }
+      this._cachedFilteredIds = new Set(this._getFilteredCoverEntities(hass));
     }
 
-    const currentCovers = this._getRelevantCovers();
-    const coversKey = this._calculateRenderKey(currentCovers);
-
-    if (!oldHass || this._lastCoversList !== coversKey) {
-      this._lastCoversList = coversKey;
-      this._render();
-    }
+    this._propagateHass(hass);
+    this._hass = hass;
   }
 
   get hass(): HomeAssistant | null { return this._hass; }
 
-  private _calculateRenderKey(covers: string[]): string {
-    // Key changes when:
-    // 1. The cover list changes
-    // 2. A cover is opening/closing (include position for continuous updates)
-    return covers.map(id => {
-      const state = this._hass!.states[id];
-      if (!state) return id;
-
-      if (state.state === 'opening' || state.state === 'closing') {
-        const position = (state.attributes as any).current_position || 0;
-        return `${id}:${state.state}:${position}`;
-      }
-
-      return `${id}:${state.state}`;
-    }).join(',');
+  private _propagateHass(hass: HomeAssistant): void {
+    if (this._headingCard) this._headingCard.hass = hass;
+    for (const card of this._tileCards.values()) {
+      card.hass = hass;
+    }
   }
 
-  private _getFilteredCoverEntities(): string[] {
-    if (!this._hass) return [];
-    // Use pre-filtered Registry data: already excludes hidden/disabled/labeled entities
+  private _getFilteredCoverEntities(hass: HomeAssistant): string[] {
     return Registry.getVisibleEntityIdsForDomain('cover')
       .filter(id => {
-        const state = this._hass!.states[id];
+        const state = hass.states[id];
         if (!state) return false;
-        // Device class filter for cover types (awning, blind, curtain, etc.)
         const deviceClass = (state.attributes as any)?.device_class as string | undefined;
         return this._deviceClasses.includes(deviceClass!) || !deviceClass;
       });
   }
 
   private _getRelevantCovers(): string[] {
-    // Use cached set if available, otherwise build it
-    if (!this._cachedFilteredIds) {
-      this._cachedFilteredIds = new Set(this._getFilteredCoverEntities());
-    }
+    if (!this._hass || !this._cachedFilteredIds) return [];
     const isOpen = this._config.group_type === 'open';
 
     const relevant: string[] = [];
     for (const id of this._cachedFilteredIds) {
-      const state = this._hass!.states[id];
+      const state = this._hass.states[id];
       if (!state) continue;
       if (isOpen) {
         if (state.state === 'open' || state.state === 'opening') relevant.push(id);
@@ -150,65 +166,124 @@ class Simon42CoversGroupCard extends HTMLElement {
     return name.trim() || state.attributes.friendly_name || entityId;
   }
 
-  private _render(): void {
-    if (!this._hass) return;
-    const covers = this._getRelevantCovers();
+  private _buildHeadingConfig(covers: string[]): any {
     const isOpen = this._config.group_type === 'open';
+    return {
+      type: 'heading',
+      heading: `${isOpen ? 'Offene Rollos & Vorhänge' : 'Geschlossene Rollos & Vorhänge'} (${covers.length})`,
+      icon: isOpen ? 'mdi:blinds-horizontal' : 'mdi:blinds',
+      badges: [{
+        type: 'button',
+        icon: isOpen ? 'mdi:arrow-down' : 'mdi:arrow-up',
+        text: isOpen ? 'Alle schließen' : 'Alle öffnen',
+        tap_action: {
+          action: 'perform-action',
+          perform_action: isOpen ? 'cover.close_cover' : 'cover.open_cover',
+          target: { entity_id: covers },
+        },
+      }],
+    };
+  }
 
+  private _getOrCreateTileCard(entityId: string): any {
+    let card = this._tileCards.get(entityId);
+    if (card) return card;
+
+    card = document.createElement('hui-tile-card');
+    card.hass = this._hass;
+    card.setConfig({
+      type: 'tile',
+      entity: entityId,
+      name: this._stripCoverType(entityId),
+      features: [{ type: 'cover-open-close' }],
+      vertical: false,
+      features_position: 'inline',
+      state_content: ['current_position', 'last_changed'],
+    });
+    this._tileCards.set(entityId, card);
+    return card;
+  }
+
+  private _calculateRenderKey(covers: string[]): string {
+    return covers.map(id => {
+      const state = this._hass!.states[id];
+      if (!state) return id;
+      if (state.state === 'opening' || state.state === 'closing') {
+        const position = (state.attributes as any).current_position || 0;
+        return `${id}:${state.state}:${position}`;
+      }
+      return `${id}:${state.state}`;
+    }).join(',');
+  }
+
+  protected render() {
+    if (!this._hass || !this._cachedFilteredIds) return nothing;
+
+    const covers = this._getRelevantCovers();
     if (covers.length === 0) {
-      this.style.display = 'none';
-      return;
+      this.hidden = true;
+      return nothing;
     }
-    this.style.display = 'block';
+    this.hidden = false;
 
-    const icon = isOpen ? '🪟' : '🔒';
-    const title = isOpen ? 'Offene Rollos & Vorhänge' : 'Geschlossene Rollos & Vorhänge';
-    const actionIcon = isOpen ? 'mdi:arrow-down' : 'mdi:arrow-up';
-    const actionService = isOpen ? 'close_cover' : 'open_cover';
-
-    this.innerHTML = `
-      <style>
-        .covers-section { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-        .section-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
-        .section-heading { font-size: ${isOpen ? '20px' : '16px'}; font-weight: ${isOpen ? '500' : '400'}; margin: 0; display: flex; align-items: center; gap: 8px; }
-        .batch-button { padding: 8px 12px; border-radius: 18px; background: var(--primary-color); color: var(--text-primary-color); border: none; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 14px; }
-        .batch-button:hover { background: var(--primary-color-dark); }
-        .batch-button ha-icon { --mdc-icon-size: 18px; }
-        .cover-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
-      </style>
+    return html`
       <div class="covers-section">
-        <div class="section-header">
-          <h${isOpen ? '2' : '3'} class="section-heading">${icon} ${title} (${covers.length})</h${isOpen ? '2' : '3'}>
-          <button class="batch-button" id="batch-action">
-            <ha-icon icon="${actionIcon}"></ha-icon>
-            Alle ${isOpen ? 'schließen' : 'öffnen'}
-          </button>
-        </div>
-        <div class="cover-grid" id="cover-grid"></div>
+        <div id="heading"></div>
+        <div class="cover-grid" id="grid"></div>
       </div>
     `;
+  }
 
-    const batchButton = this.querySelector('#batch-action');
-    if (batchButton) {
-      batchButton.addEventListener('click', () => {
-        this._hass!.callService('cover', actionService, { entity_id: covers });
-      });
+  protected updated(changedProps: PropertyValues): void {
+    super.updated(changedProps);
+    if (!this._hass || !this._cachedFilteredIds) return;
+
+    const covers = this._getRelevantCovers();
+    const coversKey = this._calculateRenderKey(covers);
+    if (this._lastCoversList === coversKey) return;
+    this._lastCoversList = coversKey;
+
+    if (covers.length === 0) return;
+
+    // Reconcile heading card
+    const headingSlot = this.shadowRoot!.getElementById('heading');
+    if (headingSlot) {
+      if (!this._headingCard) {
+        this._headingCard = document.createElement('hui-heading-card');
+        headingSlot.appendChild(this._headingCard);
+      }
+      this._headingCard.hass = this._hass;
+      this._headingCard.setConfig(this._buildHeadingConfig(covers));
     }
 
-    const grid = this.querySelector('#cover-grid')!;
+    // Reconcile tile cards in grid
+    const grid = this.shadowRoot!.getElementById('grid');
+    if (!grid) return;
+
+    const activeIds = new Set(covers);
+
+    // Remove cards for entities no longer in the list
+    for (const [id, card] of this._tileCards) {
+      if (!activeIds.has(id)) {
+        if (card.parentNode === grid) grid.removeChild(card);
+        this._tileCards.delete(id);
+      }
+    }
+
+    // Add/reorder cards to match the desired order
+    let prevNode: Node | null = null;
     for (const entityId of covers) {
-      const card = document.createElement('hui-tile-card') as any;
-      card.hass = this._hass;
-      card.setConfig({
-        type: 'tile',
-        entity: entityId,
-        name: this._stripCoverType(entityId),
-        features: [{ type: 'cover-open-close' }],
-        vertical: false,
-        features_position: 'inline',
-        state_content: ['current_position', 'last_changed'],
-      });
-      grid.appendChild(card);
+      const card = this._getOrCreateTileCard(entityId);
+      const nextSibling = prevNode ? prevNode.nextSibling : grid.firstChild;
+      if (card !== nextSibling) {
+        grid.insertBefore(card, nextSibling);
+      }
+      prevNode = card;
+    }
+
+    // Remove trailing stale nodes
+    while (prevNode && prevNode.nextSibling) {
+      grid.removeChild(prevNode.nextSibling);
     }
   }
 

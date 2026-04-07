@@ -1,7 +1,8 @@
 // ====================================================================
-// SUMMARY CARD — Reactive summary tile for lights/covers/security/batteries
+// SUMMARY CARD — Reactive summary tile for lights/covers/security/batteries (LitElement)
 // ====================================================================
 
+import { LitElement, html, css, nothing } from 'lit';
 import type { HomeAssistant, HassEntity } from '../types/homeassistant';
 import { Registry } from '../Registry';
 import { trackHassUpdate, debugLog, timeStart, timeEnd } from '../utils/debug';
@@ -31,17 +32,58 @@ const COVER_DEVICE_CLASSES = new Set(['awning', 'blind', 'curtain', 'shade', 'sh
 const SECURITY_COVER_CLASSES = new Set(['door', 'garage', 'gate']);
 const SECURITY_BINARY_SENSOR_CLASSES = new Set(['door', 'window', 'garage_door', 'opening']);
 
-class Simon42SummaryCard extends HTMLElement {
+const COLOR_MAP: Record<string, string> = {
+  orange: 'var(--orange-color, #ff9800)',
+  purple: 'var(--purple-color, #9c27b0)',
+  yellow: 'var(--yellow-color, #ffc107)',
+  red: 'var(--red-color, #f44336)',
+  grey: 'var(--disabled-color, #bdbdbd)',
+};
+
+class Simon42SummaryCard extends LitElement {
+  static properties = {
+    _count: { state: true },
+  };
+
   private _hass: HomeAssistant | null = null;
   private _config!: SummaryCardConfig;
   private _count = 0;
   private _relevantEntityIds: Set<string> | null = null;
 
-  // Stable DOM references
-  private _initialized = false;
-  private _cardEl: HTMLElement | null = null;
-  private _iconEl: HTMLElement | null = null;
-  private _nameEl: HTMLElement | null = null;
+  static styles = css`
+    :host {
+      display: block;
+      cursor: pointer;
+    }
+    ha-card {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 8px;
+      height: 100%;
+      box-sizing: border-box;
+      --ha-card-border-width: 0;
+      background: var(--ha-card-background, var(--card-background-color, #fff));
+      border-radius: var(--ha-card-border-radius, 12px);
+    }
+    ha-card:active {
+      transform: scale(0.97);
+      transition: transform 0.1s;
+    }
+    .icon {
+      --mdc-icon-size: 28px;
+      transition: color 0.3s;
+    }
+    .name {
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.2;
+      color: var(--primary-text-color);
+    }
+  `;
 
   setConfig(config: SummaryCardConfig): void {
     if (!config.summary_type) {
@@ -56,20 +98,15 @@ class Simon42SummaryCard extends HTMLElement {
     const oldHass = this._hass;
     this._hass = hass;
 
-    // Invalidate entity set cache only when registry changes (entities added/removed).
-    // State changes don't affect WHICH entities are relevant — only the count changes.
     if (!oldHass || oldHass.entities !== hass.entities) {
       this._relevantEntityIds = null;
       debugLog(`summary-${this._config?.summary_type}: cache invalidated (registry changed)`);
     }
 
-    // Recalculate count (uses cached entity set, just recounts based on current states)
+    // Recalculate count — setting _count triggers Lit re-render via @state
     const newCount = this._calculateCount();
-
-    // Only render when count changed or first render
     if (oldHass === null || this._count !== newCount) {
       this._count = newCount;
-      this._render();
     }
   }
 
@@ -78,14 +115,11 @@ class Simon42SummaryCard extends HTMLElement {
   }
 
   private _isEntityRelevant(id: string, _state: HassEntity): boolean {
-    // Single Registry call: no_dboard label + config hidden + hidden +
-    // entity_category (registry + state attribute fallback)
     return !Registry.isEntityExcludedWithStateCategory(id);
   }
 
   private _getRelevantEntities(): void {
     if (!this._hass || this._relevantEntityIds) return;
-    // Don't cache if Registry isn't initialized yet — retry on next hass update
     if (!Registry.initialized) return;
 
     const type = this._config.summary_type;
@@ -95,7 +129,6 @@ class Simon42SummaryCard extends HTMLElement {
 
     switch (this._config.summary_type) {
       case 'lights':
-        // Use pre-filtered Registry instead of iterating all ~4270 states
         result = Registry.getVisibleEntityIdsForDomain('light')
           .filter(id => hass.states[id] && this._isEntityRelevant(id, hass.states[id]));
         break;
@@ -113,7 +146,6 @@ class Simon42SummaryCard extends HTMLElement {
         break;
 
       case 'security': {
-        // Combine lock + cover + binary_sensor domains from Registry
         const lockIds = Registry.getVisibleEntityIdsForDomain('lock');
         const coverIds = Registry.getVisibleEntityIdsForDomain('cover');
         const binarySensorIds = Registry.getVisibleEntityIdsForDomain('binary_sensor');
@@ -144,8 +176,6 @@ class Simon42SummaryCard extends HTMLElement {
       }
 
       case 'batteries': {
-        // Use raw domain maps — battery sensors are often entity_category "diagnostic"
-        // which getVisibleEntityIdsForDomain() would exclude
         const sensorIds = Registry.getEntityIdsForDomain('sensor');
         const bsIds = Registry.getEntityIdsForDomain('binary_sensor');
         const allDomainIds = [...sensorIds, ...bsIds];
@@ -156,7 +186,6 @@ class Simon42SummaryCard extends HTMLElement {
           const isBatterySensor =
             (id.includes('battery') || state.attributes?.device_class === 'battery');
           if (!isBatterySensor) return false;
-          // Exclude hidden/no_dboard but keep diagnostic (batteries are often diagnostic)
           if (Registry.isExcludedByLabel(id)) return false;
           if (Registry.isHiddenByConfig(id)) return false;
           const entry = Registry.getEntity(id);
@@ -165,7 +194,6 @@ class Simon42SummaryCard extends HTMLElement {
           return true;
         });
 
-        // Deduplication: remove binary_sensor if a %-sensor from the same device exists
         const sensorDeviceIds = new Set<string>();
         for (const id of batteryEntities) {
           if (id.startsWith('sensor.')) {
@@ -194,7 +222,6 @@ class Simon42SummaryCard extends HTMLElement {
   private _calculateCount(): number {
     if (!this._hass) return 0;
 
-    // Ensure cached entity set exists
     this._getRelevantEntities();
     if (!this._relevantEntityIds || this._relevantEntityIds.size === 0) return 0;
 
@@ -277,113 +304,36 @@ class Simon42SummaryCard extends HTMLElement {
     return configs[this._config.summary_type];
   }
 
-  /** Map color names to HA CSS custom properties */
-  private _getColorCss(color: string): string {
-    const colorMap: Record<string, string> = {
-      orange: 'var(--orange-color, #ff9800)',
-      purple: 'var(--purple-color, #9c27b0)',
-      yellow: 'var(--yellow-color, #ffc107)',
-      red: 'var(--red-color, #f44336)',
-      grey: 'var(--disabled-color, #bdbdbd)',
-    };
-    return colorMap[color] || colorMap.grey;
-  }
-
-  /** Create the stable DOM shell once. */
-  private _initDom(): void {
-    if (this._initialized) return;
-    this._initialized = true;
-
-    const shadow = this.attachShadow({ mode: 'open' });
-
-    const style = document.createElement('style');
-    style.textContent = `
-      :host {
-        display: block;
-        cursor: pointer;
-      }
-      ha-card {
-        padding: 12px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        gap: 8px;
-        height: 100%;
-        box-sizing: border-box;
-        --ha-card-border-width: 0;
-        background: var(--ha-card-background, var(--card-background-color, #fff));
-        border-radius: var(--ha-card-border-radius, 12px);
-      }
-      ha-card:active {
-        transform: scale(0.97);
-        transition: transform 0.1s;
-      }
-      .icon {
-        --mdc-icon-size: 28px;
-        transition: color 0.3s;
-      }
-      .name {
-        font-size: 13px;
-        font-weight: 500;
-        line-height: 1.2;
-        color: var(--primary-text-color);
-      }
-    `;
-    shadow.appendChild(style);
-
-    this._cardEl = document.createElement('ha-card');
-
-    this._iconEl = document.createElement('ha-icon') as HTMLElement;
-    this._iconEl.className = 'icon';
-    this._cardEl.appendChild(this._iconEl);
-
-    this._nameEl = document.createElement('div');
-    this._nameEl.className = 'name';
-    this._cardEl.appendChild(this._nameEl);
-
-    this._cardEl.addEventListener('click', () => {
-      if (!this._hass || !this._config) return;
-      const displayConfig = this._getDisplayConfig();
-      const event = new CustomEvent('hass-action', {
-        bubbles: true,
-        composed: true,
-        detail: {
-          config: {
-            tap_action: {
-              action: 'navigate',
-              navigation_path: displayConfig.path,
-            },
-          },
-          action: 'tap',
-        },
-      });
-      this.dispatchEvent(event);
-    });
-
-    shadow.appendChild(this._cardEl);
-  }
-
-  private _render(): void {
+  private _handleClick(): void {
     if (!this._hass || !this._config) return;
-    timeStart(`summary-render-${this._config.summary_type}`);
-
-    this._initDom();
-
     const displayConfig = this._getDisplayConfig();
-    const colorCss = this._getColorCss(displayConfig.color);
+    this.dispatchEvent(new CustomEvent('hass-action', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        config: {
+          tap_action: {
+            action: 'navigate',
+            navigation_path: displayConfig.path,
+          },
+        },
+        action: 'tap',
+      },
+    }));
+  }
 
-    if (this._iconEl) {
-      (this._iconEl as any).icon = displayConfig.icon;
-      this._iconEl.style.color = colorCss;
-    }
+  protected render() {
+    if (!this._config) return nothing;
 
-    if (this._nameEl) {
-      this._nameEl.textContent = displayConfig.name;
-    }
+    const display = this._getDisplayConfig();
+    const colorCss = COLOR_MAP[display.color] || COLOR_MAP.grey;
 
-    timeEnd(`summary-render-${this._config.summary_type}`);
+    return html`
+      <ha-card @click=${this._handleClick}>
+        <ha-icon class="icon" .icon=${display.icon} style="color: ${colorCss}"></ha-icon>
+        <div class="name">${display.name}</div>
+      </ha-card>
+    `;
   }
 
   getCardSize(): number {
@@ -393,7 +343,6 @@ class Simon42SummaryCard extends HTMLElement {
 
 customElements.define('simon42-summary-card', Simon42SummaryCard);
 
-// Register for card picker
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: 'simon42-summary-card',

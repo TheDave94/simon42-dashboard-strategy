@@ -109,6 +109,7 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
       type: 'custom:simon42-summary-card',
       summary_type: 'batteries',
       areas_options: config.areas_options || {},
+      hide_mobile_app_batteries: config.hide_mobile_app_batteries,
     },
   );
 
