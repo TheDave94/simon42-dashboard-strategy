@@ -39,7 +39,11 @@ export interface EditorHTMLParams {
   roomPinEntities: string[];
   allEntities: EditorEntity[];
   groupByFloors: boolean;
+  showClockCard: boolean;
+  showLightSummary: boolean;
   showCoversSummary: boolean;
+  showSecuritySummary: boolean;
+  showBatterySummary: boolean;
   hideMobileAppBatteries: boolean;
   showLocksInRooms: boolean;
   customViews: CustomView[];
@@ -72,7 +76,11 @@ export function renderEditorHTML({
   roomPinEntities,
   allEntities,
   groupByFloors,
+  showClockCard,
+  showLightSummary,
   showCoversSummary,
+  showSecuritySummary,
+  showBatterySummary,
   hideMobileAppBatteries,
   showLocksInRooms,
   customViews,
@@ -106,7 +114,18 @@ export function renderEditorHTML({
       </div>
 
       <div class="section">
-        <div class="section-title">Alarm-Control-Panel</div>
+        <div class="section-title">Übersicht</div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="show-clock-card"
+            ${showClockCard !== false ? 'checked' : ''}
+          />
+          <label for="show-clock-card">Uhrzeit-Karte anzeigen</label>
+        </div>
+        <div class="description">
+          Zeigt die Uhrzeit-Karte in der Übersicht an.
+        </div>
         <div class="form-row">
           <label for="alarm-entity" style="margin-right: 8px; min-width: 120px;">Alarm-Entität:</label>
           <select id="alarm-entity" style="flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color);">
@@ -205,6 +224,17 @@ export function renderEditorHTML({
         <div class="form-row">
           <input
             type="checkbox"
+            id="show-light-summary"
+            ${showLightSummary !== false ? 'checked' : ''}
+          />
+          <label for="show-light-summary">Licht-Zusammenfassung anzeigen</label>
+        </div>
+        <div class="description">
+          Zeigt die Licht-Zusammenfassungskarte in der Übersicht an.
+        </div>
+        <div class="form-row">
+          <input
+            type="checkbox"
             id="show-covers-summary"
             ${showCoversSummary !== false ? 'checked' : ''}
           />
@@ -212,6 +242,28 @@ export function renderEditorHTML({
         </div>
         <div class="description">
           Zeigt die Rollo-Zusammenfassungskarte in der Übersicht an.
+        </div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="show-security-summary"
+            ${showSecuritySummary !== false ? 'checked' : ''}
+          />
+          <label for="show-security-summary">Sicherheits-Zusammenfassung anzeigen</label>
+        </div>
+        <div class="description">
+          Zeigt die Sicherheits-Zusammenfassungskarte in der Übersicht an.
+        </div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="show-battery-summary"
+            ${showBatterySummary !== false ? 'checked' : ''}
+          />
+          <label for="show-battery-summary">Batterie-Zusammenfassung anzeigen</label>
+        </div>
+        <div class="description">
+          Zeigt die Batterie-Zusammenfassungskarte in der Übersicht an.
         </div>
         <div class="form-row">
           <input

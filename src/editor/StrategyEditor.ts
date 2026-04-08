@@ -12,7 +12,11 @@ import {
   attachSummaryViewsCheckboxListener,
   attachRoomViewsCheckboxListener,
   attachGroupByFloorsCheckboxListener,
+  attachClockCardCheckboxListener,
+  attachLightSummaryCheckboxListener,
   attachCoversSummaryCheckboxListener,
+  attachSecuritySummaryCheckboxListener,
+  attachBatterySummaryCheckboxListener,
   attachHideMobileAppBatteriesCheckboxListener,
   attachShowLocksInRoomsCheckboxListener,
   attachAreaCheckboxListeners,
@@ -133,7 +137,11 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
     const showSummaryViews = this._config.show_summary_views === true;
     const showRoomViews = this._config.show_room_views === true;
     const groupByFloors = this._config.group_by_floors === true;
+    const showClockCard = this._config.show_clock_card !== false;
+    const showLightSummary = this._config.show_light_summary !== false;
     const showCoversSummary = this._config.show_covers_summary !== false;
+    const showSecuritySummary = this._config.show_security_summary !== false;
+    const showBatterySummary = this._config.show_battery_summary !== false;
     const hideMobileAppBatteries = this._config.hide_mobile_app_batteries === true;
     const showLocksInRooms = this._config.show_locks_in_rooms === true;
     const customViews = this._config.custom_views || [];
@@ -183,7 +191,11 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
         roomPinEntities,
         allEntities,
         groupByFloors,
+        showClockCard,
+        showLightSummary,
         showCoversSummary,
+        showSecuritySummary,
+        showBatterySummary,
         hideMobileAppBatteries,
         showLocksInRooms,
         customViews,
@@ -197,7 +209,11 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
     attachSummaryViewsCheckboxListener(this, (val: boolean) => this._showSummaryViewsChanged(val));
     attachRoomViewsCheckboxListener(this, (val: boolean) => this._showRoomViewsChanged(val));
     attachGroupByFloorsCheckboxListener(this, (val: boolean) => this._groupByFloorsChanged(val));
+    attachClockCardCheckboxListener(this, (val: boolean) => this._showClockCardChanged(val));
+    attachLightSummaryCheckboxListener(this, (val: boolean) => this._showLightSummaryChanged(val));
     attachCoversSummaryCheckboxListener(this, (val: boolean) => this._showCoversSummaryChanged(val));
+    attachSecuritySummaryCheckboxListener(this, (val: boolean) => this._showSecuritySummaryChanged(val));
+    attachBatterySummaryCheckboxListener(this, (val: boolean) => this._showBatterySummaryChanged(val));
     attachHideMobileAppBatteriesCheckboxListener(this, (hide: boolean) => this._hideMobileAppBatteriesChanged(hide));
     attachShowLocksInRoomsCheckboxListener(this, (show: boolean) => this._showLocksInRoomsChanged(show));
     this._attachCustomViewsListeners();
@@ -828,6 +844,38 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
     this._fireConfigChanged(newConfig);
   }
 
+  _showClockCardChanged(show: boolean): void {
+    if (!this._config || !this._hass) return;
+
+    const newConfig: Simon42StrategyConfig = {
+      ...this._config,
+      show_clock_card: show,
+    };
+
+    if (show === true) {
+      delete newConfig.show_clock_card;
+    }
+
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+  }
+
+  _showLightSummaryChanged(show: boolean): void {
+    if (!this._config || !this._hass) return;
+
+    const newConfig: Simon42StrategyConfig = {
+      ...this._config,
+      show_light_summary: show,
+    };
+
+    if (show === true) {
+      delete newConfig.show_light_summary;
+    }
+
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+  }
+
   _showCoversSummaryChanged(showCoversSummary: boolean): void {
     if (!this._config || !this._hass) return;
 
@@ -839,6 +887,38 @@ class Simon42DashboardStrategyEditor extends HTMLElement {
     // Remove property when set to default (true)
     if (showCoversSummary === true) {
       delete newConfig.show_covers_summary;
+    }
+
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+  }
+
+  _showSecuritySummaryChanged(show: boolean): void {
+    if (!this._config || !this._hass) return;
+
+    const newConfig: Simon42StrategyConfig = {
+      ...this._config,
+      show_security_summary: show,
+    };
+
+    if (show === true) {
+      delete newConfig.show_security_summary;
+    }
+
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+  }
+
+  _showBatterySummaryChanged(show: boolean): void {
+    if (!this._config || !this._hass) return;
+
+    const newConfig: Simon42StrategyConfig = {
+      ...this._config,
+      show_battery_summary: show,
+    };
+
+    if (show === true) {
+      delete newConfig.show_battery_summary;
     }
 
     this._config = newConfig;

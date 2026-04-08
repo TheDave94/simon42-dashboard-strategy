@@ -72,10 +72,52 @@ export function attachGroupByFloorsCheckboxListener(element: HTMLElement, callba
   }
 }
 
+export function attachClockCardCheckboxListener(element: HTMLElement, callback: (checked: boolean) => void): void {
+  const checkbox = element.querySelector('#show-clock-card') as HTMLInputElement | null;
+  if (checkbox) {
+    checkbox.addEventListener('change', (e: Event) => {
+      callback((e.target as HTMLInputElement).checked);
+    });
+  }
+}
+
+export function attachLightSummaryCheckboxListener(element: HTMLElement, callback: (checked: boolean) => void): void {
+  const checkbox = element.querySelector('#show-light-summary') as HTMLInputElement | null;
+  if (checkbox) {
+    checkbox.addEventListener('change', (e: Event) => {
+      callback((e.target as HTMLInputElement).checked);
+    });
+  }
+}
+
 export function attachCoversSummaryCheckboxListener(element: HTMLElement, callback: (checked: boolean) => void): void {
   const coversSummaryCheckbox = element.querySelector('#show-covers-summary') as HTMLInputElement | null;
   if (coversSummaryCheckbox) {
     coversSummaryCheckbox.addEventListener('change', (e: Event) => {
+      callback((e.target as HTMLInputElement).checked);
+    });
+  }
+}
+
+export function attachSecuritySummaryCheckboxListener(
+  element: HTMLElement,
+  callback: (checked: boolean) => void
+): void {
+  const checkbox = element.querySelector('#show-security-summary') as HTMLInputElement | null;
+  if (checkbox) {
+    checkbox.addEventListener('change', (e: Event) => {
+      callback((e.target as HTMLInputElement).checked);
+    });
+  }
+}
+
+export function attachBatterySummaryCheckboxListener(
+  element: HTMLElement,
+  callback: (checked: boolean) => void
+): void {
+  const checkbox = element.querySelector('#show-battery-summary') as HTMLInputElement | null;
+  if (checkbox) {
+    checkbox.addEventListener('change', (e: Event) => {
       callback((e.target as HTMLInputElement).checked);
     });
   }

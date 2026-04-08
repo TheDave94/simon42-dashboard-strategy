@@ -17,6 +17,10 @@ export interface Simon42StrategyConfig {
   show_room_views?: boolean; // default: false
   group_by_floors?: boolean; // default: false
   show_covers_summary?: boolean; // default: true
+  show_clock_card?: boolean; // default: true
+  show_light_summary?: boolean; // default: true
+  show_security_summary?: boolean; // default: true
+  show_battery_summary?: boolean; // default: true
   hide_mobile_app_batteries?: boolean; // default: false
   show_locks_in_rooms?: boolean; // default: false
 
