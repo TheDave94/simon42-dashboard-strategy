@@ -257,17 +257,21 @@ class Simon42ViewRoomStrategy extends HTMLElement {
         const deviceId = camEntity?.device_id;
 
         let isReolink = false;
+        let isAqara = false;
         if (deviceId) {
           const device = Registry.getDevice(deviceId);
           if (device) {
             const mfr = (device.manufacturer || '').toLowerCase();
             const model = (device.model || '').toLowerCase();
             isReolink = mfr.includes('reolink') || model.includes('reolink');
+            isAqara = mfr.includes('aqara') || model.includes('aqara');
           }
         }
 
-        if (isReolink && deviceId) {
+        if ((isReolink || isAqara) && deviceId) {
           const devEntities = Registry.getEntityIdsForDevice(deviceId);
+
+          // Reolink-specific entities
           const spotlight = devEntities.find(
             (id) => id.startsWith('light.') && hass.states[id] && !Registry.isEntityExcluded(id)
           );
@@ -280,14 +284,36 @@ class Simon42ViewRoomStrategy extends HTMLElement {
           const siren = devEntities.find(
             (id) => id.startsWith('siren.') && hass.states[id] && !Registry.isEntityExcluded(id)
           );
+
+          // Aqara-specific entities
+          const battery = devEntities.find(
+            (id) =>
+              id.startsWith('sensor.') &&
+              hass.states[id]?.attributes?.device_class === 'battery' &&
+              !Registry.isEntityExcluded(id)
+          );
+          const doorbell = devEntities.find(
+            (id) =>
+              id.startsWith('event.') &&
+              hass.states[id]?.attributes?.device_class === 'doorbell' &&
+              !Registry.isEntityExcluded(id)
+          );
+
           const glanceEntities: any[] = [];
-          if (spotlight) glanceEntities.push({ entity: spotlight });
-          if (motion) glanceEntities.push({ entity: motion });
-          if (siren) glanceEntities.push({ entity: siren });
+          if (isReolink) {
+            if (spotlight) glanceEntities.push({ entity: spotlight });
+            if (motion) glanceEntities.push({ entity: motion });
+            if (siren) glanceEntities.push({ entity: siren });
+          }
+          if (isAqara) {
+            if (battery) glanceEntities.push({ entity: battery });
+            if (doorbell) glanceEntities.push({ entity: doorbell });
+          }
+
           cameraCards.push({
             type: 'picture-glance',
             camera_image: cameraId,
-            camera_view: 'auto',
+            camera_view: isAqara ? 'live' : 'auto',
             fit_mode: 'cover',
             title: stripAreaName(cameraId, area, hass),
             entities: glanceEntities,
