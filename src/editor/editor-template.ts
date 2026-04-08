@@ -39,9 +39,14 @@ export interface EditorHTMLParams {
   roomPinEntities: string[];
   allEntities: EditorEntity[];
   groupByFloors: boolean;
+  showClockCard: boolean;
+  showLightSummary: boolean;
   showCoversSummary: boolean;
+  showSecuritySummary: boolean;
+  showBatterySummary: boolean;
   hideMobileAppBatteries: boolean;
   showLocksInRooms: boolean;
+  useDefaultAreaSort: boolean;
   customViews: CustomView[];
 }
 
@@ -72,41 +77,32 @@ export function renderEditorHTML({
   roomPinEntities,
   allEntities,
   groupByFloors,
+  showClockCard,
+  showLightSummary,
   showCoversSummary,
+  showSecuritySummary,
+  showBatterySummary,
   hideMobileAppBatteries,
   showLocksInRooms,
+  useDefaultAreaSort,
   customViews,
 }: EditorHTMLParams): string {
   return `
     <div class="card-config">
-      <div class="section">
-        <div class="section-title">Info-Karten</div>
-        <div class="form-row">
-          <input
-            type="checkbox"
-            id="show-weather"
-            ${showWeather !== false ? 'checked' : ''}
-          />
-          <label for="show-weather">Wetter-Karte anzeigen</label>
-        </div>
-        <div class="description">
-          Zeigt die Wettervorhersage-Karte in der Übersicht an, wenn eine Wetter-Entität verfügbar ist.
-        </div>
-        <div class="form-row">
-          <input
-            type="checkbox"
-            id="show-energy"
-            ${showEnergy ? 'checked' : ''}
-          />
-          <label for="show-energy">Energie-Dashboard anzeigen</label>
-        </div>
-        <div class="description">
-          Zeigt die Energie-Verteilungskarte in der Übersicht an, wenn Energiedaten verfügbar sind.
-        </div>
-      </div>
 
       <div class="section">
-        <div class="section-title">Alarm-Control-Panel</div>
+        <div class="section-title">Übersicht</div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="show-clock-card"
+            ${showClockCard !== false ? 'checked' : ''}
+          />
+          <label for="show-clock-card">Uhrzeit-Karte anzeigen</label>
+        </div>
+        <div class="description">
+          Zeigt die Uhrzeit-Karte in der Übersicht an.
+        </div>
         <div class="form-row">
           <label for="alarm-entity" style="margin-right: 8px; min-width: 120px;">Alarm-Entität:</label>
           <select id="alarm-entity" style="flex: 1; padding: 8px; border-radius: 4px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color);">
@@ -123,7 +119,95 @@ export function renderEditorHTML({
           </select>
         </div>
         <div class="description">
-          Wähle eine Alarm-Control-Panel-Entität aus, um sie neben der Uhr anzuzeigen. "Keine" auswählen, um nur die Uhr in voller Breite anzuzeigen.
+          Wähle eine Alarm-Control-Panel-Entität aus. Wenn die Uhrzeit-Karte aktiv ist, wird das Alarm-Panel daneben angezeigt. Ohne Uhrzeit-Karte erscheint das Alarm-Panel in voller Breite.
+        </div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="show-search-card"
+            ${showSearchCard ? 'checked' : ''}
+            ${!hasSearchCardDeps ? 'disabled' : ''}
+          />
+          <label for="show-search-card" ${!hasSearchCardDeps ? 'class="disabled-label"' : ''}>
+            Such-Karte anzeigen
+          </label>
+        </div>
+        <div class="description">
+          ${
+            hasSearchCardDeps
+              ? 'Zeigt die custom:search-card direkt unter der Uhr in der Übersicht an.'
+              : '⚠️ Benötigt <strong>custom:search-card</strong> und <strong>card-tools</strong>. Bitte installieren Sie beide Komponenten, um diese Funktion zu nutzen.'
+          }
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Zusammenfassungen</div>
+        <div class="form-row">
+          <input
+            type="radio"
+            id="summaries-2-columns"
+            name="summaries-columns"
+            value="2"
+            ${summariesColumns === 2 ? 'checked' : ''}
+          />
+          <label for="summaries-2-columns">2 Spalten (2x2 Grid)</label>
+        </div>
+        <div class="form-row">
+          <input
+            type="radio"
+            id="summaries-4-columns"
+            name="summaries-columns"
+            value="4"
+            ${summariesColumns === 4 ? 'checked' : ''}
+          />
+          <label for="summaries-4-columns">4 Spalten (1x4 Reihe)</label>
+        </div>
+        <div class="description">
+          Wähle aus, wie die Zusammenfassungskarten angezeigt werden sollen. Das Layout passt sich automatisch an, wenn Karten ausgeblendet werden.
+        </div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="show-light-summary"
+            ${showLightSummary !== false ? 'checked' : ''}
+          />
+          <label for="show-light-summary">Licht-Zusammenfassung anzeigen</label>
+        </div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="show-covers-summary"
+            ${showCoversSummary !== false ? 'checked' : ''}
+          />
+          <label for="show-covers-summary">Rollo-Zusammenfassung anzeigen</label>
+        </div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="show-security-summary"
+            ${showSecuritySummary !== false ? 'checked' : ''}
+          />
+          <label for="show-security-summary">Sicherheits-Zusammenfassung anzeigen</label>
+        </div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="show-battery-summary"
+            ${showBatterySummary !== false ? 'checked' : ''}
+          />
+          <label for="show-battery-summary">Batterie-Zusammenfassung anzeigen</label>
+        </div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="hide-mobile-app-batteries"
+            ${hideMobileAppBatteries ? 'checked' : ''}
+          />
+          <label for="hide-mobile-app-batteries">Mobile-App-Batterien ausblenden</label>
+        </div>
+        <div class="description">
+          Blendet Batterien von Smartphones, Tablets und Watches (Mobile App) in der Batterie-Übersicht und -Zusammenfassung aus.
         </div>
       </div>
 
@@ -149,6 +233,49 @@ export function renderEditorHTML({
         </div>
         <div class="description">
           Wähle Entitäten aus, die als Favoriten unter den Zusammenfassungen angezeigt werden sollen. Die Entitäten werden als Kacheln angezeigt.
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Bereiche</div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="group-by-floors"
+            ${groupByFloors ? 'checked' : ''}
+          />
+          <label for="group-by-floors">Bereiche in Etagen gliedern</label>
+        </div>
+        <div class="description">
+          Gruppiert die Bereiche in der Übersicht nach Etagen. Wenn aktiviert, wird für jede Etage eine separate Section erstellt.
+        </div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="show-locks-in-rooms"
+            ${showLocksInRooms ? 'checked' : ''}
+          />
+          <label for="show-locks-in-rooms">Schlösser in Raum-Ansichten anzeigen</label>
+        </div>
+        <div class="description">
+          Zeigt Schlösser (z.B. Nuki) in den jeweiligen Raum-Ansichten an. Schlösser erscheinen unabhängig davon immer in der Sicherheits-Übersicht.
+        </div>
+        <div class="form-row">
+          <input
+            type="checkbox"
+            id="use-default-area-sort"
+            ${useDefaultAreaSort ? 'checked' : ''}
+          />
+          <label for="use-default-area-sort">Home Assistant Sortierung verwenden</label>
+        </div>
+        <div class="description">
+          Verwendet die Sortierung der Bereiche aus Home Assistant anstelle der hier 👇 im Dashboard konfigurierten Reihenfolge.
+        </div>
+        <div class="description" style="margin-left: 0; margin-top: 16px; margin-bottom: 12px;">
+          Wähle aus, welche Bereiche im Dashboard angezeigt werden sollen und in welcher Reihenfolge. Klappe Bereiche auf, um einzelne Entitäten zu verwalten.
+        </div>
+        <div class="area-list" id="area-list">
+          ${renderAreaItems(allAreas, hiddenAreas, areaOrder)}
         </div>
       </div>
 
@@ -179,88 +306,28 @@ export function renderEditorHTML({
       </div>
 
       <div class="section">
-        <div class="section-title">Such-Karte</div>
+        <div class="section-title">Info-Karten</div>
         <div class="form-row">
           <input
             type="checkbox"
-            id="show-search-card"
-            ${showSearchCard ? 'checked' : ''}
-            ${!hasSearchCardDeps ? 'disabled' : ''}
+            id="show-weather"
+            ${showWeather !== false ? 'checked' : ''}
           />
-          <label for="show-search-card" ${!hasSearchCardDeps ? 'class="disabled-label"' : ''}>
-            Such-Karte in Übersicht anzeigen
-          </label>
+          <label for="show-weather">Wetter-Karte anzeigen</label>
         </div>
         <div class="description">
-          ${
-            hasSearchCardDeps
-              ? 'Zeigt die custom:search-card direkt unter der Uhr in der Übersicht an.'
-              : '⚠️ Benötigt <strong>custom:search-card</strong> und <strong>card-tools</strong>. Bitte installieren Sie beide Komponenten, um diese Funktion zu nutzen.'
-          }
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Zusammenfassungen</div>
-        <div class="form-row">
-          <input
-            type="checkbox"
-            id="show-covers-summary"
-            ${showCoversSummary !== false ? 'checked' : ''}
-          />
-          <label for="show-covers-summary">Rollo-Zusammenfassung anzeigen</label>
-        </div>
-        <div class="description">
-          Zeigt die Rollo-Zusammenfassungskarte in der Übersicht an.
+          Zeigt die Wettervorhersage-Karte in der Übersicht an, wenn eine Wetter-Entität verfügbar ist.
         </div>
         <div class="form-row">
           <input
             type="checkbox"
-            id="hide-mobile-app-batteries"
-            ${hideMobileAppBatteries ? 'checked' : ''}
+            id="show-energy"
+            ${showEnergy ? 'checked' : ''}
           />
-          <label for="hide-mobile-app-batteries">Mobile-App-Batterien ausblenden</label>
+          <label for="show-energy">Energie-Dashboard anzeigen</label>
         </div>
         <div class="description">
-          Blendet Batterien von Smartphones, Tablets und Watches (Mobile App) in der Batterie-Übersicht und -Zusammenfassung aus.
-        </div>
-        <div class="form-row">
-          <input
-            type="checkbox"
-            id="show-locks-in-rooms"
-            ${showLocksInRooms ? 'checked' : ''}
-          />
-          <label for="show-locks-in-rooms">Schlösser in Raum-Ansichten anzeigen</label>
-        </div>
-        <div class="description">
-          Zeigt Schlösser (z.B. Nuki) in den jeweiligen Raum-Ansichten an. Schlösser erscheinen unabhängig davon immer in der Sicherheits-Übersicht.
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">Zusammenfassungen Layout</div>
-        <div class="form-row">
-          <input
-            type="radio"
-            id="summaries-2-columns"
-            name="summaries-columns"
-            value="2"
-            ${summariesColumns === 2 ? 'checked' : ''}
-          />
-          <label for="summaries-2-columns">2 Spalten (2x2 Grid)</label>
-        </div>
-        <div class="form-row">
-          <input
-            type="radio"
-            id="summaries-4-columns"
-            name="summaries-columns"
-            value="4"
-            ${summariesColumns === 4 ? 'checked' : ''}
-          />
-          <label for="summaries-4-columns">4 Spalten (1x4 Reihe)</label>
-        </div>
-        <div class="description">
-          Wähle aus, wie die Zusammenfassungskarten angezeigt werden sollen. Das Layout passt sich automatisch an, wenn Karten ausgeblendet werden.
+          Zeigt die Energie-Verteilungskarte in der Übersicht an, wenn Energiedaten verfügbar sind.
         </div>
       </div>
 
@@ -291,21 +358,6 @@ export function renderEditorHTML({
       </div>
 
       <div class="section">
-        <div class="section-title">Bereiche-Ansicht</div>
-        <div class="form-row">
-          <input
-            type="checkbox"
-            id="group-by-floors"
-            ${groupByFloors ? 'checked' : ''}
-          />
-          <label for="group-by-floors">Bereiche in Etagen gliedern</label>
-        </div>
-        <div class="description">
-          Gruppiert die Bereiche in der Übersicht nach Etagen. Wenn aktiviert, wird für jede Etage eine separate Section erstellt.
-        </div>
-      </div>
-
-      <div class="section">
         <div class="section-title">Custom Views</div>
         <div id="custom-views-list">
           ${renderCustomViewsList(customViews)}
@@ -318,15 +370,6 @@ export function renderEditorHTML({
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-title">Bereiche</div>
-        <div class="description" style="margin-left: 0; margin-bottom: 12px;">
-          Wähle aus, welche Bereiche im Dashboard angezeigt werden sollen und in welcher Reihenfolge. Klappe Bereiche auf, um einzelne Entitäten zu verwalten.
-        </div>
-        <div class="area-list" id="area-list">
-          ${renderAreaItems(allAreas, hiddenAreas, areaOrder)}
-        </div>
-      </div>
     </div>
   `;
 }

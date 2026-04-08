@@ -22,39 +22,55 @@ export interface OverviewSectionParams {
  * Creates the overview section with summaries, clock, optional alarm,
  * optional search card, and favorites.
  */
-export function createOverviewSection(data: OverviewSectionParams): LovelaceSectionConfig {
+export function createOverviewSection(data: OverviewSectionParams): LovelaceSectionConfig | null {
   const { showSearchCard, config, hass } = data;
-
-  const cards: LovelaceCardConfig[] = [
-    {
-      type: 'heading',
-      heading: 'Übersicht',
-      heading_style: 'title',
-      icon: 'mdi:overscan',
-    },
-  ];
+  const showClockCard = config.show_clock_card !== false;
 
   // Check if alarm entity is configured
   const alarmEntity = config.alarm_entity;
 
-  if (alarmEntity) {
-    // Clock and alarm panel side-by-side
+  const cards: LovelaceCardConfig[] = [];
+
+  // Only show "Übersicht" heading if clock or alarm is visible
+  if (showClockCard || alarmEntity) {
     cards.push({
-      type: 'clock',
-      clock_size: 'small',
-      show_seconds: false,
+      type: 'heading',
+      heading: 'Übersicht',
+      heading_style: 'title',
+      icon: 'mdi:overscan',
     });
+  }
+
+  if (showClockCard) {
+    if (alarmEntity) {
+      // Clock and alarm panel side-by-side
+      cards.push({
+        type: 'clock',
+        clock_size: 'small',
+        show_seconds: false,
+      });
+      cards.push({
+        type: 'tile',
+        entity: alarmEntity,
+        vertical: false,
+      });
+    } else {
+      // Clock only, full width
+      cards.push({
+        type: 'clock',
+        clock_size: 'small',
+        show_seconds: false,
+        grid_options: {
+          columns: 'full',
+        },
+      });
+    }
+  } else if (alarmEntity) {
+    // No clock, but alarm panel full width
     cards.push({
       type: 'tile',
       entity: alarmEntity,
       vertical: false,
-    });
-  } else {
-    // Clock only, full width
-    cards.push({
-      type: 'clock',
-      clock_size: 'small',
-      show_seconds: false,
       grid_options: {
         columns: 'full',
       },
@@ -74,23 +90,21 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
   // Summaries columns (default: 2)
   const summariesColumns = config.summaries_columns || 2;
   const showCoversSummary = config.show_covers_summary !== false;
-
-  // Add summaries heading
-  cards.push({
-    type: 'heading',
-    heading: 'Zusammenfassungen',
-  });
+  const showLightSummary = config.show_light_summary !== false;
+  const showSecuritySummary = config.show_security_summary !== false;
+  const showBatterySummary = config.show_battery_summary !== false;
 
   // Build summary cards based on config
-  const summaryCards: LovelaceCardConfig[] = [
-    {
+  const summaryCards: LovelaceCardConfig[] = [];
+
+  if (showLightSummary) {
+    summaryCards.push({
       type: 'custom:simon42-summary-card',
       summary_type: 'lights',
       areas_options: config.areas_options || {},
-    },
-  ];
+    });
+  }
 
-  // Covers optional
   if (showCoversSummary) {
     summaryCards.push({
       type: 'custom:simon42-summary-card',
@@ -99,35 +113,46 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
     });
   }
 
-  summaryCards.push(
-    {
+  if (showSecuritySummary) {
+    summaryCards.push({
       type: 'custom:simon42-summary-card',
       summary_type: 'security',
       areas_options: config.areas_options || {},
-    },
-    {
+    });
+  }
+
+  if (showBatterySummary) {
+    summaryCards.push({
       type: 'custom:simon42-summary-card',
       summary_type: 'batteries',
       areas_options: config.areas_options || {},
       hide_mobile_app_batteries: config.hide_mobile_app_batteries,
-    }
-  );
-
-  // Layout logic: adapt to number of cards
-  if (summariesColumns === 4) {
-    // 4 columns: all cards in a single row
-    cards.push({
-      type: 'horizontal-stack',
-      cards: summaryCards,
     });
-  } else {
-    // 2 columns: split into rows of 2
-    for (let i = 0; i < summaryCards.length; i += 2) {
-      const rowCards = summaryCards.slice(i, i + 2);
+  }
+
+  // Only show summaries heading and cards if at least one is enabled
+  if (summaryCards.length > 0) {
+    cards.push({
+      type: 'heading',
+      heading: 'Zusammenfassungen',
+    });
+
+    // Layout logic: adapt to number of cards
+    if (summariesColumns === 4) {
+      // 4 columns: all cards in a single row
       cards.push({
         type: 'horizontal-stack',
-        cards: rowCards,
+        cards: summaryCards,
       });
+    } else {
+      // 2 columns: split into rows of 2
+      for (let i = 0; i < summaryCards.length; i += 2) {
+        const rowCards = summaryCards.slice(i, i + 2);
+        cards.push({
+          type: 'horizontal-stack',
+          cards: rowCards,
+        });
+      }
     }
   }
 
@@ -149,6 +174,11 @@ export function createOverviewSection(data: OverviewSectionParams): LovelaceSect
         state_content: 'last_changed',
       });
     }
+  }
+
+  // If nothing is visible, skip the entire section
+  if (cards.length === 0) {
+    return null;
   }
 
   return {

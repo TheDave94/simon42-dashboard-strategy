@@ -28,7 +28,7 @@ class Simon42ViewOverviewStrategy extends HTMLElement {
     Registry.initialize(hass, dashboardConfig);
 
     // Visible areas (filtered + sorted by config)
-    const visibleAreas = getVisibleAreas(Registry.areas, dashboardConfig.areas_display);
+    const visibleAreas = getVisibleAreas(Registry.areas, dashboardConfig.areas_display, dashboardConfig.use_default_area_sort);
 
     // Collect data for overview
     const persons = collectPersons(hass, dashboardConfig);
@@ -53,8 +53,9 @@ class Simon42ViewOverviewStrategy extends HTMLElement {
       groupByFloors
     );
 
+    const overviewSection = createOverviewSection({ someSensorId, showSearchCard, config: dashboardConfig, hass });
     const overviewSections: LovelaceSectionConfig[] = [
-      createOverviewSection({ someSensorId, showSearchCard, config: dashboardConfig, hass }),
+      ...(overviewSection ? [overviewSection] : []),
       ...(Array.isArray(areasSections) ? areasSections : [areasSections]),
       ...(weatherEnergySection
         ? Array.isArray(weatherEnergySection)
