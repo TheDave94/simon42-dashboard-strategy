@@ -153,6 +153,14 @@ Custom Cards (LightsGroupCard, CoversGroupCard, SummaryCard) nutzen **LitElement
 
 Registry liest synchron aus dem `hass`-Objekt und baut pre-computed Maps fuer O(1)-Lookups.
 
+### Performance-Design
+
+Die Strategy folgt denselben Patterns wie HA's offizielle Home- und Areas-Strategien:
+
+- **Pre-filtered Area-Controls:** Area-Cards bekommen nur Controls die im Raum tatsaechlich existieren (`controls: ['light', 'cover-shutter']`), nicht pauschal alle. Ohne Pre-Filtering muss jede Card selbst alle Entities scannen — bei vielen Raeumen und Entities fuehrt das auf schwachen Geraeten (Tablets) zu massiven Ladezeiten.
+- **Pre-resolved Views:** Alle Views (Raeume, Lichter, etc.) werden in `generate()` vollstaendig aufgeloest statt als Strategy-Stubs zurueckgegeben. Das eliminiert verzoegerte Strategy-Aufloesung bei Navigation (analog zu `expandLovelaceConfigStrategies` im HA Home Panel).
+- **Eager Chunk Loading:** JS-Chunks werden sofort beim Laden des Entry-Points gestartet, nicht erst wenn `generate()` aufgerufen wird.
+
 ## Contributing
 
 Issues und Pull Requests sind willkommen! Bitte teste PRs gruendlich in einem lokalen HA-Setup.
