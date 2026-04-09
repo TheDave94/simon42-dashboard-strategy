@@ -333,6 +333,24 @@ Entitäten können auf mehreren Ebenen gefiltert werden:
 | Welche Version ist installiert? | Browser-Konsole öffnen (F12) → Meldung `Simon42 Dashboard Strategy vX.Y.Z loaded` suchen |
 | Strategy-Timeout auf langsamen Verbindungen | Normal bei Slow 4G — HA hat ein festes 5-Sekunden-Limit für Custom Elements. Bei normalen Verbindungen kein Problem |
 
+<details>
+<summary>Migration von manueller Installation zu HACS</summary>
+
+Wenn du die Strategy vorher **manuell installiert** hattest (ohne HACS) und jetzt auf HACS umsteigen willst, kann es zu einem Fehler kommen:
+
+> `Error: Failed to execute 'define' on 'CustomElementRegistry': the name "simon42-summary-card" has already been used`
+
+Das passiert, wenn die alte Resource-URL noch registriert ist und die JS-Datei dadurch doppelt geladen wird. So behebst du das:
+
+1. Manuell kopierte Dateien im Ordner `www` löschen (alles inklusive des Ordners `simon42-strategy` kann weg)
+2. Alte Resource entfernen: **Einstellungen → Dashboards → Drei Punkte (⋮) → Ressourcen** — die alte URL (ohne `hacsfiles` im Pfad) löschen
+3. Home Assistant neu starten
+4. HACS-Repo über den Button oben hinzufügen und installieren
+5. Home Assistant neu starten
+6. Browser-Cache leeren (`Cmd+Shift+R` / `Ctrl+Shift+R`)
+
+</details>
+
 ## Contributing
 
 Issues und Pull Requests sind willkommen! Bitte teste PRs gründlich in einem lokalen HA-Setup.
