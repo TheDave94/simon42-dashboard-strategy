@@ -170,6 +170,7 @@
     "custom_cards_heading_placeholder": "Custom Cards",
     "custom_cards_desc": "Heading and icon for the custom cards section on the dashboard. Leave empty for defaults.",
     "add_custom_card": "+ Add new card",
+    "video_tutorial": "Watch video tutorial",
     "custom_cards_help": "Add custom cards to the overview. Cards appear in a separate section between summaries and areas. Tip: Create the card in a regular dashboard first, copy the YAML code, and paste it here.",
     "section_custom_badges": "Custom Badges",
     "add_custom_badge": "+ Add new badge",

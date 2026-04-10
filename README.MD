@@ -255,6 +255,7 @@ content: "Willkommen zuhause!"
 </p>
 
 #### Eigene Badges
+
 Beliebige Badges via YAML zum Header der Übersicht hinzufügen — sie erscheinen neben den Personen-Chips.
 
 ```yaml
@@ -265,6 +266,10 @@ show_state: true
 show_icon: true
 entity: sun.sun
 ```
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/TheRealSimon42/simon42-dashboard-strategy/main/assets/Custom-Badges-hinzufugen.gif" alt="Eigene Badges hinzufügen" width="800" />
+</p>
 
 #### Custom Views
 
