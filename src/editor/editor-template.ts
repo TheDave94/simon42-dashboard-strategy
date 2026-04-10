@@ -564,7 +564,10 @@ export function renderEditorHTML({
       </div>
 
       <div class="section">
-        <div class="section-title">${localize('editor.section_custom_cards')}</div>
+        <div class="section-title" style="display: flex; align-items: center; gap: 8px;">
+          ${localize('editor.section_custom_cards')}
+          <a href="https://github.com/TheRealSimon42/simon42-dashboard-strategy/blob/main/assets/Eigene-Karten-hinzufugen.gif" target="_blank" rel="noopener" style="color: var(--primary-color); text-decoration: none; font-size: 18px;" title="${localize('editor.video_tutorial')}">🎬</a>
+        </div>
         <div style="display: flex; gap: 8px; margin-bottom: 12px;">
           <input type="text" id="custom-cards-heading" value="${customCardsHeading}" placeholder="${localize('editor.custom_cards_heading_placeholder')}" style="flex: 2; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color);" />
           <input type="text" id="custom-cards-icon" value="${customCardsIcon}" placeholder="mdi:cards" style="flex: 1; padding: 6px 8px; border-radius: 4px; border: 1px solid var(--divider-color); background: var(--card-background-color); color: var(--primary-text-color);" />
@@ -584,7 +587,10 @@ export function renderEditorHTML({
       </div>
 
       <div class="section">
-        <div class="section-title">${localize('editor.section_custom_badges')}</div>
+        <div class="section-title" style="display: flex; align-items: center; gap: 8px;">
+          ${localize('editor.section_custom_badges')}
+          <a href="https://github.com/TheRealSimon42/simon42-dashboard-strategy/blob/main/assets/Custom-Badges-hinzufugen.gif" target="_blank" rel="noopener" style="color: var(--primary-color); text-decoration: none; font-size: 18px;" title="${localize('editor.video_tutorial')}">🎬</a>
+        </div>
         <div id="custom-badges-list">
           ${renderCustomBadgesList(customBadges)}
         </div>
@@ -597,7 +603,10 @@ export function renderEditorHTML({
       </div>
 
       <div class="section">
-        <div class="section-title">${localize('editor.section_custom_views')}</div>
+        <div class="section-title" style="display: flex; align-items: center; gap: 8px;">
+          ${localize('editor.section_custom_views')}
+          <a href="https://github.com/TheRealSimon42/simon42-dashboard-strategy/blob/main/assets/Custom-View-hinzufugen.gif" target="_blank" rel="noopener" style="color: var(--primary-color); text-decoration: none; font-size: 18px;" title="${localize('editor.video_tutorial')}">🎬</a>
+        </div>
         <div id="custom-views-list">
           ${renderCustomViewsList(customViews)}
         </div>

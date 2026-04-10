@@ -170,6 +170,7 @@
     "custom_cards_heading_placeholder": "Eigene Karten",
     "custom_cards_desc": "Überschrift und Icon der Section für die eigenen Karten auf dem Dashboard. Leer lassen für Standardwerte.",
     "add_custom_card": "+ Neue Karte hinzufügen",
+    "video_tutorial": "Video-Anleitung ansehen",
     "custom_cards_help": "Füge eigene Karten zur Übersicht hinzu. Die Karten erscheinen in einer eigenen Section zwischen Zusammenfassung und Bereichen. Tipp: Erstelle die Karte zuerst in einem normalen Dashboard, kopiere den YAML-Code und füge ihn hier ein.",
     "section_custom_badges": "Eigene Badges",
     "add_custom_badge": "+ Neues Badge hinzufügen",
