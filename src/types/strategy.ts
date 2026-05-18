@@ -137,6 +137,16 @@ export interface Simon42StrategyConfig {
    */
   section_visibility?: Record<string, { entity: string; state: string }>;
   show_updates_badge?: boolean; // default: false (auto-hides at zero pending)
+  /**
+   * Per-room conditional visibility. Keyed by area_id. When set, the room
+   * view (and its corresponding nav tab) is only rendered when
+   * hass.states[entity].state === state. Useful for guest-mode rooms,
+   * seasonal rooms (garden in winter), etc.
+   *
+   * The overview's area cards section is NOT affected — only the per-area
+   * room views and nav tabs.
+   */
+  room_visibility?: Record<string, { entity: string; state: string }>;
 
   // Layout
   sections_order?: SectionKey[]; // default: DEFAULT_SECTIONS_ORDER
