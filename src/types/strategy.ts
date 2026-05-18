@@ -13,6 +13,7 @@ export type SectionKey = 'overview' | 'custom_cards' | 'areas' | 'weather' | 'en
 export type SectionKey = 'overview' | 'custom_cards' | 'areas' | 'weather' | 'energy' | 'todos';
 export type SectionKey = 'overview' | 'custom_cards' | 'areas' | 'weather' | 'energy' | 'persons';
 export type SectionKey = 'overview' | 'custom_cards' | 'areas' | 'weather' | 'energy' | 'vacuums';
+export type SectionKey = 'overview' | 'custom_cards' | 'areas' | 'weather' | 'energy' | 'maintenance';
 
 export const DEFAULT_SECTIONS_ORDER: SectionKey[] = [
   'overview',
@@ -47,6 +48,7 @@ export const ALL_HEADING_KEYS: HeadingKey[] = [
   'todos',
   'persons',
   'vacuums',
+  'maintenance',
 ];
 
 // -- Main Strategy Config ---------------------------------------------
@@ -116,6 +118,7 @@ export interface Simon42StrategyConfig {
   show_now_playing_badge?: boolean; // default: false (auto-hides when nothing's playing)
   show_vacuums_section?: boolean; // default: false (auto-hides without vacuum/mower)
   show_sun_badge?: boolean; // default: false (requires HA sun integration / sun.sun entity)
+  show_maintenance_section?: boolean; // default: false (auto-hides when nothing pending)
 
   // Layout
   sections_order?: SectionKey[]; // default: DEFAULT_SECTIONS_ORDER
