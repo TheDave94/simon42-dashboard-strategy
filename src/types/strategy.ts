@@ -110,6 +110,7 @@ export interface Simon42StrategyConfig {
   // to auto-discovery if the configured entity is unavailable at render time.
   favorite_entities?: string[];
   room_pin_entities?: string[];
+  security_extra_entities?: string[];
 
   // Area management
   use_default_area_sort?: boolean; // default: false
