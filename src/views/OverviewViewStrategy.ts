@@ -149,7 +149,26 @@ class Simon42ViewOverviewStrategy extends HTMLElement {
       .filter((b) => b.parsed_config)
       .map((b) => b.parsed_config as LovelaceBadgeConfig);
 
-    return createOverviewView(overviewSections, [...personBadges, ...customBadges]);
+    // Optional "now playing" badge — first media_player in 'playing' state
+    const nowPlayingBadges: LovelaceBadgeConfig[] = [];
+    if (dashboardConfig.show_now_playing_badge === true) {
+      const playing = Registry.getVisibleEntityIdsForDomain('media_player').find((id) => {
+        // eslint-disable-next-line security/detect-object-injection -- entity IDs from Registry
+        return hass.states[id]?.state === 'playing';
+      });
+      if (playing) {
+        nowPlayingBadges.push({
+          type: 'entity',
+          entity: playing,
+          icon: 'mdi:play-circle',
+          color: 'green',
+          show_state: false,
+          tap_action: { action: 'more-info' },
+        });
+      }
+    }
+
+    return createOverviewView(overviewSections, [...personBadges, ...nowPlayingBadges, ...customBadges]);
   }
 }
 
