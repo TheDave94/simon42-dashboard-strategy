@@ -107,6 +107,8 @@
     "section_order_desc": "Drag sections to reorder them on the overview page. Empty sections are hidden automatically.",
     "section_hidden": "hidden",
     "energy_link_dashboard": "Link to energy dashboard",
+    "show_now_playing_badge": "Show \"now playing\" badge",
+    "show_now_playing_badge_desc": "Adds a small green badge to the overview header showing the first media_player whose state is \"playing\". Click opens the media controls. Auto-hidden when nothing is playing.",
     "target_section": "Show in",
     "section_overview": "Overview",
     "show_clock_card": "Show clock card",
