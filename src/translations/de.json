@@ -74,7 +74,8 @@
     "smoke_gas_active": "Rauch- & Gasmelder - Alarm",
     "smoke_gas_inactive": "Rauch- & Gasmelder - Kein Alarm",
     "water_leak_active": "Wassersensoren - Alarm",
-    "water_leak_inactive": "Wassersensoren - Trocken"
+    "water_leak_inactive": "Wassersensoren - Trocken",
+    "extra_entities": "Smart-Geräte & Sonstiges"
   },
   "batteries": {
     "critical": "Kritisch",
@@ -165,6 +166,8 @@
     "group_covers_by_floors": "Rollos nach Etagen gruppieren",
     "group_covers_by_floors_desc": "Gruppiert die Rollos in der Rollos-Ansicht nach Etagen. Jede Etage erhält einen eigenen Unterabschnitt mit dem Etagennamen als Überschrift. Betrifft die Hauptgruppe; Markisen und Fenster bleiben ungeteilt.",
     "show_security_summary": "Sicherheits-Zusammenfassung anzeigen",
+    "security_extra_entities": "Zusätzliche Entitäten in Sicherheits-Ansicht",
+    "security_extra_entities_desc": "Beliebige Entitäten (Smart-Geräte, eigene Sensoren etc.) auswählen, die unten in der Sicherheits-Ansicht als Kacheln erscheinen. Praktisch für Backofen, Herd, Bügeleisen — alles, was du vor dem Verlassen noch einmal prüfen möchtest.",
     "show_climate_summary": "Klima-Zusammenfassung anzeigen",
     "show_climate_summary_desc": "Zeigt die Klima-Zusammenfassungskarte in der Übersicht an. Zählt aktive Thermostate und Klimageräte.",
     "show_battery_summary": "Batterie-Zusammenfassung anzeigen",
