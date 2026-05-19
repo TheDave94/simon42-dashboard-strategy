@@ -1,10 +1,9 @@
 #!/usr/bin/env node
-/* eslint-disable security/detect-object-injection, security/detect-non-literal-fs-filename
- *  -- this script runs only in CI against translation files committed to
- *     this repo. There is no user-controlled input. The object accesses
+/* eslint-disable security/detect-object-injection
+ *  -- this script runs only in CI against translation files committed
+ *     to this repo. There is no user-controlled input. The object accesses
  *     are over known, fixed structures (parsed JSON / character indices
- *     in the source file). The fs reads target the two literal paths in
- *     the FILES constant below.
+ *     in the source file).
  */
 // Translation file linter — catches three classes of bug:
 //   1. Invalid JSON
@@ -16,17 +15,26 @@
 
 import { readFileSync } from 'node:fs';
 
-const FILES = ['src/translations/en.json', 'src/translations/de.json'];
+const EN_PATH = 'src/translations/en.json';
+const DE_PATH = 'src/translations/de.json';
 
 let problems = 0;
-const report = (file, msg) => {
+
+function report(file, msg) {
   console.error(`[lint-translations] ${file}: ${msg}`);
   problems++;
-};
+}
+
+// Read with a fixed-set of literal paths to satisfy
+// security/detect-non-literal-fs-filename — the only legitimate inputs are
+// EN_PATH and DE_PATH; anything else is a programmer error here.
+function readTranslation(file) {
+  if (file === EN_PATH) return readFileSync(EN_PATH, 'utf8');
+  if (file === DE_PATH) return readFileSync(DE_PATH, 'utf8');
+  throw new Error(`unknown translation file: ${file}`);
+}
 
 // Walk a JSON.parse-able text and report duplicate keys.
-// Uses a simple state machine over the raw text so we see every key occurrence,
-// not just the last one (which is all JSON.parse retains).
 function findDuplicateKeys(file, text) {
   const stack = [new Set()]; // each frame = keys seen so far in the current object
   let i = 0;
@@ -40,9 +48,8 @@ function findDuplicateKeys(file, text) {
     if (c === '[') { stack.push(null); i++; continue; } // sentinel: skip dup-tracking inside arrays
     if (c === ']') { stack.pop(); i++; continue; }
     if (c === '"') {
-      // string literal — find matching close, honoring escapes
       const start = i;
-      let startLine = line;
+      const startLine = line;
       i++;
       while (i < len && text[i] !== '"') {
         if (text[i] === '\\') i++;
@@ -50,10 +57,8 @@ function findDuplicateKeys(file, text) {
         i++;
       }
       const value = text.slice(start + 1, i);
-      i++; // past closing quote
-      // skip whitespace
+      i++;
       while (i < len && /\s/.test(text[i])) { if (text[i] === '\n') line++; i++; }
-      // if next non-ws is ':', this string is a key
       if (text[i] === ':') {
         const frame = stack[stack.length - 1];
         if (frame instanceof Set) {
@@ -69,7 +74,6 @@ function findDuplicateKeys(file, text) {
   }
 }
 
-// Walk a parsed object and collect every leaf key-path.
 function collectKeys(obj, prefix = '') {
   const out = [];
   if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
@@ -86,33 +90,26 @@ function collectKeys(obj, prefix = '') {
   return out;
 }
 
-const parsed = {};
-for (const f of FILES) {
-  let raw;
-  try {
-    raw = readFileSync(f, 'utf8');
-  } catch (e) {
-    report(f, `cannot read: ${e.message}`);
-    continue;
-  }
-  try {
-    parsed[f] = JSON.parse(raw);
-  } catch (e) {
-    report(f, `invalid JSON: ${e.message}`);
-    continue;
-  }
-  findDuplicateKeys(f, raw);
-}
+const parsedEn = (() => {
+  try { return JSON.parse(readTranslation(EN_PATH)); }
+  catch (e) { report(EN_PATH, `invalid JSON: ${e.message}`); return null; }
+})();
+const parsedDe = (() => {
+  try { return JSON.parse(readTranslation(DE_PATH)); }
+  catch (e) { report(DE_PATH, `invalid JSON: ${e.message}`); return null; }
+})();
 
-// Key-parity check between en and de.
-if (parsed[FILES[0]] && parsed[FILES[1]]) {
-  const enKeys = new Set(collectKeys(parsed[FILES[0]]));
-  const deKeys = new Set(collectKeys(parsed[FILES[1]]));
+if (parsedEn) findDuplicateKeys(EN_PATH, readTranslation(EN_PATH));
+if (parsedDe) findDuplicateKeys(DE_PATH, readTranslation(DE_PATH));
+
+if (parsedEn && parsedDe) {
+  const enKeys = new Set(collectKeys(parsedEn));
+  const deKeys = new Set(collectKeys(parsedDe));
   for (const k of enKeys) {
-    if (!deKeys.has(k)) report(FILES[1], `missing key '${k}' (present in en.json)`);
+    if (!deKeys.has(k)) report(DE_PATH, `missing key '${k}' (present in en.json)`);
   }
   for (const k of deKeys) {
-    if (!enKeys.has(k)) report(FILES[0], `missing key '${k}' (present in de.json)`);
+    if (!enKeys.has(k)) report(EN_PATH, `missing key '${k}' (present in de.json)`);
   }
 }
 
