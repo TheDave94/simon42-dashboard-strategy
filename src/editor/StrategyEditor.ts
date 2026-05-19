@@ -1061,6 +1061,8 @@ class Simon42DashboardStrategyEditor extends LitElement {
         return this._config.show_energy === false;
       case 'plants':
         return this._config.show_plants_section !== true;
+      case 'agenda':
+        return this._config.show_agenda_section !== true;
       default:
         return false;
     }
@@ -1077,6 +1079,11 @@ class Simon42DashboardStrategyEditor extends LitElement {
 
   private _isSectionToggleable(key: SectionKey): boolean {
     return key === 'weather' || key === 'energy' || key === 'plants';
+    ['agenda', { icon: 'mdi:calendar', labelKey: 'sections.agenda' }],
+  ]);
+
+  private _isSectionToggleable(key: SectionKey): boolean {
+    return key === 'weather' || key === 'energy' || key === 'agenda';
   }
 
   private _toggleSectionVisibility(key: SectionKey, visible: boolean): void {
@@ -1086,6 +1093,8 @@ class Simon42DashboardStrategyEditor extends LitElement {
       this._toggleChanged('show_energy', visible, true);
     } else if (key === 'plants') {
       this._toggleChanged('show_plants_section', visible, false);
+    } else if (key === 'agenda') {
+      this._toggleChanged('show_agenda_section', visible, false);
     }
   }
 
