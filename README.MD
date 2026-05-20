@@ -1,4 +1,4 @@
-# simon42 Dashboard Strategy — Community Fork
+# Dashboard Strategy — Enhanced Edition (v2.0+)
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 [![GitHub Release](https://img.shields.io/github/v/release/TheDave94/simon42-dashboard-strategy?style=for-the-badge&color=green)](https://github.com/TheDave94/simon42-dashboard-strategy/releases)
@@ -6,15 +6,47 @@
 ![AI-Assisted](https://img.shields.io/badge/AI--Assisted-blue?style=for-the-badge)
 [![License](https://img.shields.io/badge/License-CC_BY--NC--SA_4.0-lightgrey?style=for-the-badge)](LICENSE)
 
-> ### 🍴 This is a community fork
+> ### A substantially improved fork of [simon42's dashboard strategy](https://github.com/TheRealSimon42/simon42-dashboard-strategy)
 >
-> This repository is a community-maintained fork of [TheRealSimon42/simon42-dashboard-strategy](https://github.com/TheRealSimon42/simon42-dashboard-strategy), maintained by [@TheDave94](https://github.com/TheDave94). It exists to ship community fixes and features that have been [submitted as PRs to upstream](https://github.com/TheRealSimon42/simon42-dashboard-strategy/pulls?q=is%3Apr+author%3ATheDave94) but haven't been merged yet — install this fork if you don't want to wait.
+> Started as a community fork tracking upstream `main`. As of **v2.0** it has diverged substantially — this is no longer a "PRs waiting to be merged" project but its own thing, with features and architectural improvements that aren't going back upstream. The original strategy's UX foundation (per-area views, summary tiles, areas grid) is preserved with full credit to [@TheRealSimon42](https://github.com/TheRealSimon42); everything else is reimagined.
 >
-> **What's extra in the fork** (beyond upstream `main`): six new optional overview sections (plants, agenda, todos, persons, vacuums, maintenance), five opt-in live header badges (power, unavailable, now-playing, sun, updates), per-section + per-room conditional visibility, Security view (locks, doors, garages, windows, smoke/gas), `custom_sections` user-declared sections, snapshot tests, translation lint + ESLint enforcement in CI, release-please automation. The full grouped-PR list is on the [v1.4.0 release notes](https://github.com/TheDave94/simon42-dashboard-strategy/releases/tag/v1.4.0-thedave).
+> #### What v2.0 brings on top of upstream
 >
-> **Installation**: scroll to [Installation (Fork)](#installation-fork) below — install as a HACS custom repository pointing at `TheDave94/simon42-dashboard-strategy`. Switching between upstream and fork is a HACS uninstall + reinstall; no manual file cleanup required.
+> **New custom cards & features** (all with HA's `<ha-form>` config editors and "Add card" picker integration):
+> - `simon42-zone-presence-card` — per-area presence indicators with curated entity lists, theme-aware icon strips, full action-handler support (tap / hold / double-tap / keyboard).
+> - `simon42-summary-card` — reactive count tiles for lights / covers / security / batteries / climate. CSS container-query scaling.
+> - `simon42-lights-group-card` / `simon42-covers-group-card` — nested groups, floor grouping, batch controls.
+> - `simon42-sticky-lock-feature` — custom tile feature that pins room modes against auto-changes.
 >
-> **Upstream-friendly**: changes are still submitted upstream and the fork tracks upstream `main`. If the maintainer merges them, this fork will resync. Bug reports for fork-only behavior go to [TheDave94/simon42-dashboard-strategy/issues](https://github.com/TheDave94/simon42-dashboard-strategy/issues); everything else still belongs upstream.
+> **Dashboard surface improvements**:
+> - Six new optional overview sections (plants, agenda, todos, persons, vacuums, maintenance).
+> - Five opt-in live header badges (power, unavailable alerts, now-playing, sun, updates).
+> - Per-section + per-room conditional visibility (any entity/state predicate).
+> - Security view (locks, doors, garages, windows, smoke/gas).
+> - `custom_sections` and `custom_views` for user-declared content.
+> - `presence_entities` per-area config drives both favorites pin and Room view zone-presence.
+>
+> **Architecture / quality** (the part you don't see):
+> - HA 2026.5+ baseline. Modern HA design tokens (`--ha-space-*`, `--ha-card-*`, container queries).
+> - Visual config editor partly migrated to `<ha-form>` schemas (4 of 13 tabs in v2.0; rest in v2.1).
+> - Source maps in production. Version string injected at build (no more "logs lie about which version is running").
+> - Webpack code-splitting: 5 chunks (main + lit + core + views + editor), lazy-loaded.
+> - `happy-dom` test environment + 63 unit tests on the custom cards.
+> - npm audit + ESLint + translation lint gated in CI.
+> - Dependabot watching both Actions and npm (Lit, TS, webpack, vitest grouped).
+> - `useDefineForClassFields: false` pinned so Lit reactivity doesn't break on future TS target bumps.
+> - Registry + editor cache invalidate on `hass.entities` identity change (correctness fix — stale entity lists no longer survive across HA registry mutations).
+> - i18n on every user-facing string including aria-labels.
+>
+> **What's not coming**: backwards compatibility with HA < 2026.5, the legacy `ll-strategy-simon42-dashboard` element name, or the `pin_zone_presence_to_favorites_entities` / `summary_card_density` config aliases. Those are gone.
+>
+> #### Installation
+>
+> HACS custom repository → `TheDave94/simon42-dashboard-strategy`, category Lovelace. See [Installation](#installation-fork) below.
+>
+> #### Bug reports & feature requests
+>
+> [TheDave94/simon42-dashboard-strategy/issues](https://github.com/TheDave94/simon42-dashboard-strategy/issues). Upstream-relevant issues will still get cross-referenced.
 
 Eine modulare und hochkonfigurierbare Dashboard-Strategy für Home Assistant, die automatisch Views basierend auf Bereichen, Entitäten und deren Zuständen generiert.
 
