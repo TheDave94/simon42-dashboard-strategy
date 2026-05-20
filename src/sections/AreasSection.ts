@@ -173,7 +173,10 @@ export function createAreasSection(
   hass: HomeAssistant | null = null,
   hideAreasHeading: boolean = false,
   hideAreasOtherHeading: boolean = false
-): LovelaceSectionConfig | LovelaceSectionConfig[] {
+): LovelaceSectionConfig | LovelaceSectionConfig[] | null {
+  // Auto-hide: no visible areas → no section at all (not a lonely heading)
+  if (visibleAreas.length === 0) return null;
+
   // No floor grouping: flat list
   if (!groupByFloors || !hass) {
     const cards: LovelaceCardConfig[] = [];
