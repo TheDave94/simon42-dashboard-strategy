@@ -115,6 +115,9 @@
     "room_pins": "Raum-Pins",
     "room_mode": "Raum-Modus"
   },
+  "zone_presence": {
+    "title": "Anwesenheit"
+  },
   "editor": {
     "section_order": "Abschnitts-Reihenfolge",
     "section_order_desc": "Ziehe die Abschnitte per Drag & Drop in die gewünschte Reihenfolge. Leere Abschnitte werden automatisch ausgeblendet.",

@@ -115,6 +115,9 @@
     "room_pins": "Room Pins",
     "room_mode": "Room Mode"
   },
+  "zone_presence": {
+    "title": "Presence"
+  },
   "editor": {
     "section_order": "Section Order",
     "section_order_desc": "Drag sections to reorder them on the overview page. Empty sections are hidden automatically.",

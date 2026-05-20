@@ -45,6 +45,7 @@ import { LitElement, html, css, nothing, type PropertyValues, type TemplateResul
 import { classMap } from 'lit/directives/class-map.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import type { HomeAssistant, HassEntity } from '../types/homeassistant';
+import { setupLocalize, localize } from '../utils/localize';
 
 // The Window.customCards interface is already declared in
 // SummaryCard.ts / LightsGroupCard.ts / CoversGroupCard.ts. We register
@@ -204,17 +205,17 @@ class Simon42ZonePresenceCard extends LitElement {
     .zones {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px 14px;
+      gap: 6px 12px;
       align-items: flex-start;
     }
     .zone {
-      flex: 1 1 56px;
-      min-width: 48px;
+      flex: 1 1 64px;
+      min-width: 56px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
-      padding: 6px 4px;
+      gap: 4px;
+      padding: 8px 4px;
       border-radius: 10px;
       cursor: pointer;
       user-select: none;
@@ -233,32 +234,41 @@ class Simon42ZonePresenceCard extends LitElement {
       cursor: default;
       opacity: 0.6;
     }
-    .dot {
+    .icon-wrap {
       --dot-color: var(--state-active-color, var(--primary-color));
       --dot-inactive: var(--state-inactive-color, var(--disabled-text-color));
-      width: 14px;
-      height: 14px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      background: var(--dot-inactive);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: color-mix(in srgb, var(--dot-inactive) 18%, transparent);
       transition: background-color 200ms ease, box-shadow 200ms ease, transform 180ms ease;
     }
-    .zone.active .dot {
-      background: var(--dot-color);
-      box-shadow: 0 0 0 4px color-mix(in srgb, var(--dot-color) 24%, transparent);
-      transform: scale(1.15);
+    .icon-wrap ha-icon {
+      --mdc-icon-size: 22px;
+      color: var(--dot-inactive);
+      transition: color 200ms ease;
     }
-    .zone.unavailable .dot {
+    .zone.active .icon-wrap {
+      background: color-mix(in srgb, var(--dot-color) 22%, transparent);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--dot-color) 14%, transparent);
+      transform: scale(1.06);
+    }
+    .zone.active .icon-wrap ha-icon {
+      color: var(--dot-color);
+    }
+    .zone.unavailable .icon-wrap {
       background: transparent;
       border: 1.5px dashed var(--dot-inactive);
-      width: 11px;
-      height: 11px;
     }
     .label {
       font-size: 11px;
       line-height: 1.15;
       color: var(--secondary-text-color);
       text-align: center;
-      max-width: 88px;
+      max-width: 96px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -324,6 +334,47 @@ class Simon42ZonePresenceCard extends LitElement {
     if (z.name) return z.name;
     const s = this.hass?.states[z.entity] as HassEntity | undefined;
     return s?.attributes?.friendly_name || z.entity.split('.').slice(1).join('.') || z.entity;
+  }
+
+  /**
+   * Resolve the icon for a zone entry. Priority:
+   *   1. Per-entry `icon:` config (manual override)
+   *   2. The icon set on the *area* the binary_sensor belongs to
+   *      (entity.area_id, or via its device.area_id) — this matches the
+   *      user expectation that each "zone of the room" inherits the
+   *      room's icon by default.
+   *   3. The entity's own `attributes.icon` (custom icon set on the
+   *      entity in HA).
+   *   4. A generic presence fallback (mdi:motion-sensor).
+   *
+   * All hass.entities / hass.devices / hass.areas lookups stay
+   * defensive — the card is intended to be usable outside the simon42
+   * strategy too, so it can't assume Registry is initialised.
+   */
+  private _iconFor(z: ZoneEntry): string {
+    if (z.icon) return z.icon;
+    const hass = this.hass;
+    if (hass) {
+      const entityEntry = Reflect.get(hass.entities as Record<string, unknown>, z.entity) as
+        | { area_id?: string | null; device_id?: string | null }
+        | undefined;
+      let areaId: string | null | undefined = entityEntry?.area_id;
+      if (!areaId && entityEntry?.device_id) {
+        const dev = Reflect.get(hass.devices as Record<string, unknown>, entityEntry.device_id) as
+          | { area_id?: string | null }
+          | undefined;
+        areaId = dev?.area_id;
+      }
+      if (areaId) {
+        const area = Reflect.get(hass.areas as Record<string, unknown>, areaId) as
+          | { icon?: string | null }
+          | undefined;
+        if (area?.icon) return area.icon;
+      }
+      const stateIcon = (hass.states[z.entity] as HassEntity | undefined)?.attributes?.icon;
+      if (typeof stateIcon === 'string' && stateIcon.length > 0) return stateIcon;
+    }
+    return 'mdi:motion-sensor';
   }
 
   private _stateFor(z: ZoneEntry): { active: boolean; unavailable: boolean } {
@@ -399,7 +450,15 @@ class Simon42ZonePresenceCard extends LitElement {
   protected render(): TemplateResult {
     if (!this._config || !this.hass) return html``;
 
-    const headerName = this._config.name;
+    // Initialise the shared localize() helper from this hass instance.
+    // The strategy may have already done it during Registry.initialize,
+    // but the card can be used stand-alone in any Lovelace view — so we
+    // make sure the language is set before reading translation keys.
+    setupLocalize(this.hass);
+
+    // Default the card heading to a localized "Presence" when the user
+    // hasn't overridden it. Pass an empty string in config to hide.
+    const headerName = this._config.name ?? localize('zone_presence.title');
     const headerIcon = this._config.icon;
     const showHeader = !!headerName || !!headerIcon;
     const entries = this._entries();
@@ -418,6 +477,7 @@ class Simon42ZonePresenceCard extends LitElement {
           ${entries.map((z, i) => {
             const { active, unavailable } = this._stateFor(z);
             const color = resolveColor(z.color);
+            const icon = this._iconFor(z);
             return html`
               <div
                 class=${classMap({ zone: true, active, unavailable })}
@@ -431,7 +491,9 @@ class Simon42ZonePresenceCard extends LitElement {
                 title=${this._nameFor(z)}
                 @action=${this._handleAction}
               >
-                <div class="dot"></div>
+                <div class="icon-wrap">
+                  <ha-icon icon=${icon}></ha-icon>
+                </div>
                 <div class="label">${this._nameFor(z)}</div>
               </div>
             `;
