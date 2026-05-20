@@ -340,6 +340,24 @@ class Simon42ZonePresenceCard extends LitElement {
     };
   }
 
+  public static async getConfigElement(): Promise<HTMLElement> {
+    const { createSimpleConfigEditor } = await import('./SimpleConfigEditor');
+    return createSimpleConfigEditor(
+      [
+        { name: 'name', selector: { text: {} } },
+        { name: 'icon', selector: { icon: {} } },
+        {
+          name: 'entities',
+          required: true,
+          selector: {
+            entity: { multiple: true, filter: { domain: 'binary_sensor' } },
+          },
+        },
+      ],
+      'card.simon42-zone-presence-card',
+    );
+  }
+
   // ---- Render gating -------------------------------------------------
 
   protected shouldUpdate(changed: PropertyValues): boolean {
@@ -465,11 +483,6 @@ class Simon42ZonePresenceCard extends LitElement {
         disabled: this._stateFor(entry).unavailable,
       });
     });
-    // Reflect dark-mode for theme-aware ::shadow consumers (Mushroom pattern).
-    if (changed.has('hass') && this.hass) {
-      const dark = (this.hass.themes as { darkMode?: boolean } | undefined)?.darkMode === true;
-      this.toggleAttribute('dark-mode', dark);
-    }
   }
 
   // ---- Render --------------------------------------------------------

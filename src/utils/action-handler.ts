@@ -54,12 +54,26 @@ function getActionHandler(): ActionHandlerElement {
  * `action` CustomEvent with `detail.action ∈ 'tap' | 'hold' |
  * 'double_tap'` matching the user's gesture. Keyboard Enter / Space
  * also fire 'tap' when the node has `tabindex`.
+ *
+ * Lifecycle: HA's `<action-handler>` element attaches its listeners
+ * directly to `el`. When the bound node is GC'd (e.g. the card is
+ * removed from the DOM), the listeners go with it — no manual
+ * `unbind` step is needed.
  */
 export function bindActionHandler(el: HTMLElement, opts: ActionHandlerOptions): void {
   const handler = getActionHandler();
   if (typeof handler.bind === 'function') {
     handler.bind(el, opts);
   }
+}
+
+/**
+ * For tests / harnesses that reset DOM between cases. Production
+ * code doesn't need to call this — the action-handler element lives
+ * for the lifetime of the document.
+ */
+export function _resetActionHandlerForTesting(): void {
+  _actionHandlerEl = null;
 }
 
 export type ActionHandlerEventDetail = {

@@ -15,6 +15,7 @@
     "noImplicitThis": true,
     "noImplicitReturns": true,
     "strictNullChecks": true,
+    "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     // Pin legacy class-field semantics regardless of target.
