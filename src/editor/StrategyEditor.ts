@@ -30,6 +30,7 @@ import { renderOverviewTab } from './tabs/OverviewTab';
 import { renderSummariesTab } from './tabs/SummariesTab';
 import { renderSectionOrderTab } from './tabs/SectionOrderTab';
 import { renderAreasTab } from './tabs/AreasTab';
+import { renderRoomPinsTab } from './tabs/RoomPinsTab';
 
 // -- Supporting types for the editor ------------------------------------
 
@@ -1908,101 +1909,29 @@ class Simon42DashboardStrategyEditor extends LitElement {
   }
 
   private _renderRoomPinsSection(): TemplateResult {
-    const roomPinEntities = this._config.room_pin_entities || [];
-    const allEntities = this._getAllEntitiesForSelect();
-    const allAreas = Object.values(this._hass!.areas).sort((a, b) => a.name.localeCompare(b.name));
-    const roomPinsShowState = this._config.room_pins_show_state === true;
-    const roomPinsHideLastChanged = this._config.room_pins_hide_last_changed === true;
-    const roomPinsPosition = this._config.room_pins_position === 'bottom' ? 'bottom' : 'top';
-
-    const entityMap = new Map(allEntities.map((e) => [e.entity_id, e]));
-    const areaMap = new Map(allAreas.map((a) => [a.area_id, a.name]));
-    const filteredEntities = this._getFilteredEntities(this._roomPinSearch, true);
-
-    return html`
-      <div class="section">
-        <div class="section-title">${localize('editor.section_room_pins')}</div>
-
-        <div id="room-pins-list" style="margin-bottom: 12px;">
-          ${roomPinEntities.length === 0
-            ? html`<div class="empty-state">${localize('editor.no_room_pins')}</div>`
-            : html`
-              <div class="entity-list-container">
-                ${roomPinEntities.map((entityId) => {
-                  const entity = entityMap.get(entityId);
-                  const name = entity?.name || entityId;
-                  const areaId = entity?.area_id || entity?.device_area_id;
-                  const areaName = areaId ? areaMap.get(areaId) || areaId : localize('editor.no_room');
-
-                  return html`
-                    <div class="entity-list-item" data-entity-id=${entityId}
-                      draggable="true"
-                      @dragstart=${(ev: DragEvent) => this._handleEntityDragStart(ev, 'room_pins')}
-                      @dragend=${this._handleEntityDragEnd}
-                      @dragover=${this._handleEntityDragOver}
-                      @dragleave=${this._handleEntityDragLeave}
-                      @drop=${(ev: DragEvent) => this._handleEntityDrop(ev, 'room_pins')}>
-                      <span class="drag-icon">&#x2630;</span>
-                      <span class="item-info">
-                        <span class="item-name">${name}</span>
-                        <span class="item-entity-id">${entityId}</span>
-                        <span class="item-area">&#x1F4CD; ${areaName}</span>
-                      </span>
-                      <button class="btn-remove" @click=${() => this._removeRoomPinEntity(entityId)}>&#x2715;</button>
-                    </div>
-                  `;
-                })}
-              </div>
-            `}
-        </div>
-
-        <div class="entity-search-picker">
-          <input type="text" class="entity-search-input"
-            placeholder=${localize('editor.select_entity') + '...'}
-            .value=${this._roomPinSearch}
-            @input=${(e: Event) => { this._roomPinSearch = (e.target as HTMLInputElement).value; this.requestUpdate(); }}
-            @blur=${() => { setTimeout(() => { this._roomPinSearch = ''; this.requestUpdate(); }, 200); }}
-          />
-          ${this._roomPinSearch.length >= 2 ? html`
-            <div class="entity-search-results">
-              ${filteredEntities.length > 0
-                ? filteredEntities.map((entity) => html`
-                  <div class="entity-search-result" @mousedown=${(e: Event) => { e.preventDefault(); this._addRoomPinEntity(entity.entity_id); this._roomPinSearch = ''; this.requestUpdate(); }}>
-                    <span class="entity-search-name">${entity.name}</span>
-                    <span class="entity-search-id">${entity.entity_id}</span>
-                  </div>
-                `)
-                : html`<div class="entity-search-no-results">${localize('editor.no_results')}</div>`
-              }
-            </div>
-          ` : nothing}
-        </div>
-        <div class="description">${unsafeHTML(localize('editor.room_pins_desc'))}</div>
-
-        ${this._renderCheckbox('room-pins-show-state', localize('editor.show_state'), roomPinsShowState,
-          (checked) => this._toggleChanged('room_pins_show_state', checked, false))}
-
-        ${this._renderCheckbox('room-pins-hide-last-changed', localize('editor.hide_last_changed'), roomPinsHideLastChanged,
-          (checked) => this._toggleChanged('room_pins_hide_last_changed', checked, false))}
-
-        <div style="font-size: 13px; font-weight: 500; color: var(--primary-text-color); margin-top: 12px; margin-bottom: 4px;">
-          ${localize('editor.room_pins_position')}
-        </div>
-        <div class="form-row">
-          <input type="radio" id="room-pins-top" name="room-pins-position" value="top"
-            ?checked=${roomPinsPosition === 'top'}
-            @change=${() => this._roomPinsPositionChanged('top')} />
-          <label for="room-pins-top">${localize('editor.room_pins_position_top')}</label>
-        </div>
-        <div class="form-row">
-          <input type="radio" id="room-pins-bottom" name="room-pins-position" value="bottom"
-            ?checked=${roomPinsPosition === 'bottom'}
-            @change=${() => this._roomPinsPositionChanged('bottom')} />
-          <label for="room-pins-bottom">${localize('editor.room_pins_position_bottom')}</label>
-        </div>
-        <div class="description">${localize('editor.room_pins_position_desc')}</div>
-      </div>
-    `;
+    if (!this._hass) return html``;
+    return renderRoomPinsTab({
+      hass: this._hass,
+      config: this._config,
+      search: this._roomPinSearch,
+      allEntitiesForSelect: this._getAllEntitiesForSelect(),
+      filteredEntities: this._getFilteredEntities(this._roomPinSearch, true),
+      renderCheckbox: (id, label, checked, onChange) =>
+        this._renderCheckbox(id, label, checked, onChange),
+      onSearchChange: (value) => {
+        this._roomPinSearch = value;
+        this.requestUpdate();
+      },
+      onAddEntity: (entityId) => this._addRoomPinEntity(entityId),
+      onRemoveEntity: (entityId) => this._removeRoomPinEntity(entityId),
+      onPositionChange: (position) => this._roomPinsPositionChanged(position),
+      onToggleChange: (k, v, d) => this._toggleChanged(k, v, d),
+      onDragStart: (ev) => this._handleEntityDragStart(ev, 'room_pins'),
+      onDragEnd: this._handleEntityDragEnd,
+      onDragOver: this._handleEntityDragOver,
+      onDragLeave: this._handleEntityDragLeave,
+      onDrop: (ev) => this._handleEntityDrop(ev, 'room_pins'),
+    });
   }
 
   private _roomPinsPositionChanged(position: 'top' | 'bottom'): void {
