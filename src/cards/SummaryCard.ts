@@ -455,6 +455,47 @@ class Simon42SummaryCard extends LitElement {
   public static getStubConfig(): SummaryCardConfig {
     return { summary_type: 'lights' };
   }
+
+  // Visual config editor — surfaces in HA's "Edit card" dialog instead
+  // of the raw YAML fallback. Lazy-imported so SimpleConfigEditor only
+  // joins the editor chunk when the user opens an edit dialog.
+  public static async getConfigElement(): Promise<HTMLElement> {
+    const { createSimpleConfigEditor } = await import('./SimpleConfigEditor');
+    return createSimpleConfigEditor(
+      [
+        {
+          name: 'summary_type',
+          required: true,
+          selector: {
+            select: {
+              mode: 'dropdown',
+              options: [
+                { value: 'lights', label: 'Lights' },
+                { value: 'covers', label: 'Covers' },
+                { value: 'security', label: 'Security' },
+                { value: 'batteries', label: 'Batteries' },
+                { value: 'climate', label: 'Climate' },
+              ],
+            },
+          },
+        },
+        {
+          name: 'density',
+          selector: {
+            select: {
+              mode: 'dropdown',
+              options: [
+                { value: '', label: 'Auto (container query)' },
+                { value: 'comfortable', label: 'Comfortable' },
+                { value: 'compact', label: 'Compact' },
+              ],
+            },
+          },
+        },
+      ],
+      'card.simon42-summary-card',
+    );
+  }
 }
 
 customElements.define('simon42-summary-card', Simon42SummaryCard);

@@ -778,6 +778,46 @@ class Simon42LightsGroupCard extends LitElement {
   public static getStubConfig(): { group_type: 'on' | 'off' | 'all' } {
     return { group_type: 'all' };
   }
+
+  public static async getConfigElement(): Promise<HTMLElement> {
+    const { createSimpleConfigEditor } = await import('./SimpleConfigEditor');
+    return createSimpleConfigEditor(
+      [
+        {
+          name: 'group_type',
+          required: true,
+          selector: {
+            select: {
+              mode: 'dropdown',
+              options: [
+                { value: 'on', label: 'On' },
+                { value: 'off', label: 'Off' },
+                { value: 'all', label: 'All' },
+              ],
+            },
+          },
+        },
+        { name: 'group_by_floors', selector: { boolean: {} } },
+        { name: 'nested_groups', selector: { boolean: {} } },
+        { name: 'default_expanded', selector: { boolean: {} } },
+        {
+          name: 'sort_by',
+          selector: {
+            select: {
+              mode: 'dropdown',
+              options: [
+                { value: 'last_changed', label: 'Last changed' },
+                { value: 'name', label: 'Name' },
+              ],
+            },
+          },
+        },
+        { name: 'heading_label', selector: { text: {} } },
+        { name: 'heading_icon', selector: { icon: {} } },
+      ],
+      'card.simon42-lights-group-card',
+    );
+  }
 }
 
 customElements.define('simon42-lights-group-card', Simon42LightsGroupCard);

@@ -587,6 +587,31 @@ class Simon42CoversGroupCard extends LitElement {
   public static getStubConfig(): { group_type: 'open' | 'closed' | 'partially_open' } {
     return { group_type: 'open' };
   }
+
+  public static async getConfigElement(): Promise<HTMLElement> {
+    const { createSimpleConfigEditor } = await import('./SimpleConfigEditor');
+    return createSimpleConfigEditor(
+      [
+        {
+          name: 'group_type',
+          required: true,
+          selector: {
+            select: {
+              mode: 'dropdown',
+              options: [
+                { value: 'open', label: 'Open' },
+                { value: 'closed', label: 'Closed' },
+                { value: 'partially_open', label: 'Partially open' },
+              ],
+            },
+          },
+        },
+        { name: 'show_partially_open', selector: { boolean: {} } },
+        { name: 'group_by_floors', selector: { boolean: {} } },
+      ],
+      'card.simon42-covers-group-card',
+    );
+  }
 }
 
 customElements.define('simon42-covers-group-card', Simon42CoversGroupCard);
