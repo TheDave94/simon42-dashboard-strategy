@@ -64,11 +64,11 @@ function buildRoomModeCard(
     color: 'accent',
     features,
     features_position: 'bottom',
-    // rows: 'auto' so the feature row's height (select-options + sticky
-    // lock) is reserved properly inside the favorites grid — otherwise
-    // a single grid row clips the feature row and visually bleeds into
-    // adjacent sections.
-    grid_options: { columns: 'full', rows: 'auto' },
+    // 6/12 columns (half-row) lets a sibling pinned card share the
+    // row — the favorites grid usually has space for two compact
+    // tiles side-by-side. rows: 'auto' keeps the feature row from
+    // overflowing into the next section.
+    grid_options: { columns: 6, rows: 'auto' },
   };
 }
 
@@ -95,7 +95,7 @@ function buildZonePresenceCard(
   return {
     type: 'custom:simon42-zone-presence-card',
     entities: zoneEntities,
-    grid_options: { columns: 'full', rows: 'auto' },
+    grid_options: { columns: 6, rows: 'auto' },
   };
 }
 
