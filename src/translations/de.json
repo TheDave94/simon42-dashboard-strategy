@@ -410,7 +410,7 @@
     "favorites_split": "Pro Viewport aufteilen",
     "favorites_split_help": "Auf gerätespezifische Favoriten umstellen (Mobil / Tablet / Wand)",
     "favorites_merge": "Zu einer Liste zusammenführen",
-    "favorites_merge_help": "Alle Viewports in eine einzige Liste zusammenführen (Union bleibt erhalten)",
+    "favorites_merge_help": "Führt alle Viewport-Listen zu einer zusammen, dedupliziert. Mobil- und wandspezifische Einträge erscheinen in der zusammengeführten Liste.",
     "favorites_flat_hint": "Eine Liste auf allen Geräten. Pro Gerät aufteilen für unterschiedliche Favoriten.",
     "live_preview_title": "Live-Vorschau",
     "live_preview_show": "Vorschau einblenden",

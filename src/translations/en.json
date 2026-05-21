@@ -410,7 +410,7 @@
     "favorites_split": "Split by viewport",
     "favorites_split_help": "Switch to per-viewport favorites (phone / tablet / wall)",
     "favorites_merge": "Merge to single list",
-    "favorites_merge_help": "Merge all viewports back into a single flat list (preserves union)",
+    "favorites_merge_help": "Merges all viewport lists into one, deduplicated. Phone-only and wall-only entries will appear in the unified list.",
     "favorites_flat_hint": "Single list shown on every device. Split per device to differentiate.",
     "live_preview_title": "Live preview",
     "live_preview_show": "Show preview",
