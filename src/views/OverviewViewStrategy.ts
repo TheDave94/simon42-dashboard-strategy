@@ -64,8 +64,9 @@ function normalizeSectionsOrder(order: string[], customSectionKeys: string[]): s
  * explicit `visibility:` block, return the condition list so the strategy
  * can mirror it onto a sibling heading. Returns undefined for plain cards.
  *
- * Without this, a hidden conditional custom card leaves an orphaned title
- * visible — see issue #224.
+ * Without this, a hidden conditional custom card leaves an orphaned
+ * title visible. Original analysis: upstream
+ * TheRealSimon42/simon42-dashboard-strategy#224.
  */
 function inheritVisibilityFromCard(parsedConfig: unknown): unknown[] | undefined {
   if (!parsedConfig || typeof parsedConfig !== 'object') return undefined;

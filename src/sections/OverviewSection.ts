@@ -458,7 +458,8 @@ export function createCustomCardsSection(
  * card is a `conditional` card (or carries its own `visibility:` block),
  * the same conditions are mirrored onto the heading so the heading
  * hides/shows together with the user's card — otherwise a hidden
- * conditional leaves an orphaned title visible (issue #224).
+ * conditional leaves an orphaned title visible (original analysis:
+ * upstream simon42#224).
  */
 function buildTitleHeading(title: string, parsedConfig: unknown): LovelaceCardConfig {
   const heading: LovelaceCardConfig = { type: 'heading', heading: title };

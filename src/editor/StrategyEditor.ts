@@ -119,7 +119,7 @@ class OrielEditor extends LitElement {
    * flips), so an identity comparison catches every real change.
    * Without this, the editor would show stale entity lists until
    * the user closed and reopened it. Mirrors the Registry-level
-   * invalidation pinned in beta.19.
+   * invalidation pattern.
    */
   private _areaEntitiesCacheKey: unknown = null;
 
@@ -1494,9 +1494,9 @@ class OrielEditor extends LitElement {
   }
 
   private _renderSectionOrderPanel(): TemplateResult {
-    // Migrated to a per-tab module in beta.23. Drag-drop state and
-    // every mutator stays on the editor class — only the render
-    // template is in the tab module — see src/editor/tabs/SectionOrderTab.ts.
+    // Section-order render template lives in a per-tab module; drag-drop
+    // state + every mutator stays on the editor class. See
+    // src/editor/tabs/SectionOrderTab.ts.
     if (!this._hass) return html``;
     return renderSectionOrderTab({
       hass: this._hass,
@@ -1629,10 +1629,10 @@ class OrielEditor extends LitElement {
   // -- Overview section --------------------------------------------------
 
   private _renderOverviewSection(): TemplateResult {
-    // Migrated to ha-form in beta.21. The legacy "search card deps
-    // missing" warning is preserved here as a sibling block — it's
-    // a pure informational notice, not a form input. ha-form drives
-    // every actual config field via the schema.
+    // Overview tab is ha-form-driven. The "search card deps missing"
+    // warning is preserved as a sibling block — it's a pure
+    // informational notice, not a form input. ha-form drives every
+    // actual config field via the schema.
     if (!this._hass) return html``;
     const hasSearchCardDeps = this._checkSearchCardDependencies();
     const showSearchCard = this._config.show_search_card === true;
@@ -1670,10 +1670,10 @@ class OrielEditor extends LitElement {
   }
 
   private _renderSummariesSection(): TemplateResult {
-    // Migrated to ha-form in beta.22. Security extras passed as a
+    // Summaries tab is ha-form-driven. Security extras passed as a
     // slot since it's a stateful searchable picker — converting it
-    // to a `selector: { entity: { multiple: true } }` will land in
-    // a follow-up beta.
+    // to a `selector: { entity: { multiple: true } }` is a future
+    // cleanup.
     if (!this._hass) return html``;
     return renderSummariesTab({
       hass: this._hass,
@@ -2025,7 +2025,7 @@ class OrielEditor extends LitElement {
   }
 
   private _renderAreasSection(): TemplateResult {
-    // Migrated to a tab module in v2.1.0-beta.1. Stateful helpers
+    // Areas section lives in a per-tab module. Stateful helpers
     // (_renderAreaItems / _renderAreaEntities / _renderBadgeGroup,
     // drag refs, _expandedAreas, _areaEntitiesCache) stay on the
     // editor class — the tab module calls back via the context.
@@ -2099,9 +2099,9 @@ class OrielEditor extends LitElement {
   }
 
   private _renderViewsSection(): TemplateResult {
-    // Migrated to a per-tab module in beta.20 — establishes the
-    // ha-form schema pattern that the rest of the editor will follow
-    // in subsequent betas. See src/editor/tabs/ViewsTab.ts.
+    // Views section lives in a per-tab module — established the
+    // ha-form schema pattern that the rest of the editor follows.
+    // See src/editor/tabs/ViewsTab.ts.
     if (!this._hass) return html``;
     return renderViewsTab({
       hass: this._hass,

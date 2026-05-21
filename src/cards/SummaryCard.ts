@@ -527,8 +527,8 @@ class OrielSummaryCard extends LitElement {
     // Bind HA's global <action-handler> custom element to the
     // ha-card once, so tap/hold/double-tap all dispatch a single
     // @action event with `detail.action` set. Same pattern as
-    // ZonePresenceCard — see /tmp/oriel_audit_2026.md §2.2 for
-    // the rationale (raw @click loses keyboard + hold).
+    // ZonePresenceCard — raw @click would lose keyboard + hold
+    // behaviour.
     if (!changed.has('hass') && !changed.has('_config')) return;
     const card = this.shadowRoot?.querySelector<HTMLElement>('ha-card');
     if (!card) return;

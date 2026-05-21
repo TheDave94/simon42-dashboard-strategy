@@ -466,7 +466,7 @@ export interface OrielConfig {
     | { default?: string[]; phone?: string[]; tablet?: string[]; wall?: string[] };
   room_pin_entities?: string[];
   security_extra_entities?: string[];
-  light_favorite_entities?: string[]; // light.* glance row on overview (#176)
+  light_favorite_entities?: string[]; // light.* glance row on overview (originally upstream simon42#176)
 
   // Area management
   use_default_area_sort?: boolean; // default: false
