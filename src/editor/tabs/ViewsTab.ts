@@ -7,9 +7,8 @@
 // Why ha-form: HA themes the form components consistently with the
 // rest of the UI, ha-form handles i18n labels + helpers, focus
 // management, ARIA, and keyboard nav. Hand-rolled <input>/<select>
-// blocks bypassed every one of those. The audit at
-// /tmp/oriel_audit_2026.md §2.1 identified this migration as the
-// single biggest tech-debt anchor in the repo (~4300 LOC monolith).
+// blocks bypassed every one of those. Migrating to ha-form was the
+// single biggest tech-debt cleanup the editor needed.
 //
 // Pattern (so future tabs follow the same shape):
 //   - Export a single render function `renderXxxTab(ctx) => TemplateResult`.
