@@ -372,6 +372,36 @@
     "yaml_error_invalid": "Ungültiges YAML",
     "yaml_error_not_object": "YAML muss ein Objekt ergeben",
     "yaml_error_not_object_or_array": "YAML muss ein Objekt oder Array ergeben",
-    "yaml_error_not_card_or_list": "YAML muss eine Karte oder Liste von Karten ergeben"
+    "yaml_error_not_card_or_list": "YAML muss eine Karte oder Liste von Karten ergeben",
+    "health": {
+      "title": "Dashboard-Gesundheitscheck",
+      "desc": "Konfigurationsprobleme erkannt. Verwaiste Referenzen lassen sich per Klick beheben; YAML-Parsing-Fehler müssen im jeweiligen Tab bearbeitet werden.",
+      "fix": "Beheben",
+      "no_auto_fix": "Keine Auto-Lösung",
+      "orphan_weather_entity_title": "Wetter-Entität existiert nicht mehr",
+      "orphan_weather_entity_desc": "weather_entity zeigt auf eine Entität, die nicht mehr in HA existiert. Entfernen aktiviert die Auto-Erkennung.",
+      "orphan_power_badge_entity_title": "Power-Badge-Entität existiert nicht mehr",
+      "orphan_power_badge_entity_desc": "power_badge_entity zeigt auf eine fehlende Entität. Entfernen blendet das Badge aus.",
+      "orphan_house_mode_entity_title": "House-Mode-Entität existiert nicht mehr",
+      "orphan_house_mode_entity_desc": "house_mode_entity zeigt auf eine fehlende Entität. Mode-Reihenfolge fällt auf den Standard zurück.",
+      "orphan_room_pins_title": "Raum-Pin-Entitäten fehlen",
+      "orphan_room_pins_desc": "Einige in Räumen angepinnte Entitäten existieren nicht mehr. Nur die fehlenden werden entfernt.",
+      "orphan_light_favorites_title": "Licht-Favoriten fehlen",
+      "orphan_light_favorites_desc": "Einige Entitäten in deinen Licht-Favoriten existieren nicht mehr.",
+      "orphan_favorite_entities_title": "Favoriten-Entitäten fehlen",
+      "orphan_favorite_entities_desc": "Einige Entitäten in deiner Favoritenliste existieren nicht mehr.",
+      "orphan_notification_triggers_title": "Benachrichtigungs-Trigger zeigen auf fehlende Entitäten",
+      "orphan_notification_triggers_desc": "Ein oder mehrere notification_triggers verweisen auf nicht mehr existierende Entitäten und werden nie auslösen.",
+      "orphan_areas_options_title": "Bereichs-Optionen für fehlende Bereiche",
+      "orphan_areas_options_desc": "areas_options enthält Einträge für nicht mehr existierende Bereiche. Diese Einträge haben keine Wirkung und können entfernt werden.",
+      "orphan_custom_views_yaml_title": "Custom-View hat ungültiges YAML",
+      "orphan_custom_views_yaml_desc": "Ein oder mehrere custom_views-Einträge haben YAML-Parse-Fehler. Im Custom-Views-Tab beheben.",
+      "orphan_custom_cards_yaml_title": "Custom-Card hat ungültiges YAML",
+      "orphan_custom_cards_yaml_desc": "Ein oder mehrere custom_cards-Einträge haben YAML-Parse-Fehler. Im Custom-Cards-Tab beheben.",
+      "orphan_custom_sections_yaml_title": "Custom-Section hat ungültiges YAML",
+      "orphan_custom_sections_yaml_desc": "Ein oder mehrere custom_sections-Einträge haben YAML-Parse-Fehler. Im Custom-Sections-Tab beheben.",
+      "orphan_custom_badges_yaml_title": "Custom-Badge hat ungültiges YAML",
+      "orphan_custom_badges_yaml_desc": "Ein oder mehrere custom_badges-Einträge haben YAML-Parse-Fehler. Im Custom-Badges-Tab beheben."
+    }
   }
 }

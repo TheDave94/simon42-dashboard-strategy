@@ -45,6 +45,7 @@ import { renderNotificationsTab } from './tabs/NotificationsTab';
 import { renderModeOrderTab } from './tabs/ModeOrderTab';
 import { renderFloorplanTab } from './tabs/FloorplanTab';
 import { renderRoomOverridesTab } from './tabs/RoomOverridesTab';
+import { renderHealthTab } from './tabs/HealthTab';
 import { renderSetupTab, SETUP_TAB_CSS } from './tabs/SetupTab';
 import { unsafeCSS } from 'lit';
 import { FEATURE_REGISTRY, findFeature } from '../onboarding/features';
@@ -1224,6 +1225,7 @@ class OrielEditor extends LitElement {
         </div>
         ${this._renderMigrationBanner()}
         ${this._renderUsageSuggestion()}
+        ${this._renderHealthSection()}
         ${this._renderSetupSection()}
         ${this._renderOverviewSection()}
         ${this._renderSummariesSection()}
@@ -1259,6 +1261,23 @@ class OrielEditor extends LitElement {
         ${this._renderFloorplanSection()}
       </div>
     `;
+  }
+
+  /**
+   * Render the dashboard health-check tab. Returns nothing when there
+   * are no detected issues (the tab hides entirely — per F-4 spec, the
+   * absence of problems should not consume visual space).
+   */
+  private _renderHealthSection(): TemplateResult | typeof nothing {
+    if (!this._hass) return nothing;
+    return renderHealthTab({
+      hass: this._hass,
+      config: this._config,
+      onApplyFix: (patched) => {
+        this._config = patched;
+        this._fireConfigChanged(patched);
+      },
+    });
   }
 
   private _renderNotificationsSection(): TemplateResult {
