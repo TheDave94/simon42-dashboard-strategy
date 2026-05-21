@@ -97,6 +97,7 @@ window.oriel?.registerSection({
 ### Architecture / quality
 
 - **HA 2025.5+ baseline** (hard floor — `getCreateSuggestions` strategy API). Newer-HA features (`--ha-space-*`, `--ha-card-*`, `--ha-font-*` design tokens, CSS container queries, `<ha-form>`-driven editors, `actionHandler` directive) are opt-in via the fallback chain — themes that don't expose `--ha-*` tokens get px fallbacks; every interactive surface degrades to native click semantics.
+- **Design tokens in cards, legacy vars in the editor.** The custom cards (NotificationCard, SummaryCard, ZonePresenceCard, RoutinesCard, etc.) use `--ha-font-size-*` and `--ha-font-weight-*` tokens with px fallbacks. The strategy editor surfaces (StrategyEditor, SetupTab, every tab module) intentionally stay on the legacy `--primary-color` / `--secondary-text-color` / `--divider-color` family — HA back-maps those to the new `--ha-*` tokens internally, so theme compatibility is identical and the line count for migration would be high for zero user-visible change. Documented as a deliberate scope decision in the v4.7 design-token PR.
 - **Code-split bundles** (main + lit + core + views + editor), lazy-loaded — the editor chunk never loads unless the user opens it.
 - **Source maps in production** for crash-report symbolication.
 - **Built-in test suite** (vitest + happy-dom + Playwright against live HA) — currently 65 unit tests + 2 browser tests.

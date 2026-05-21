@@ -43,6 +43,10 @@ class OrielScreensaverCard extends LitElement {
     .overlay {
       position: fixed;
       inset: 0;
+      /* Intentional hardcoded fallbacks: when --card-background-color
+         and --primary-text-color aren't defined the screensaver should
+         still render as dark-on-light (black/white), not as nothing.
+         Whitelisted in the v4.7.0 design-token migration. */
       background: var(--card-background-color, #000);
       color: var(--primary-text-color, #fff);
       z-index: 9999;
