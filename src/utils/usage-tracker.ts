@@ -103,16 +103,39 @@ function write(entry: UsageEntry): void {
 }
 
 /**
+ * HA entity-id shape: `domain.object_id` where each part is one or
+ * more characters of [a-z0-9_]. Anything without a dot, anything with
+ * HTML / event handlers / control characters is rejected. The
+ * strategy emits only entity IDs matching this shape, so production
+ * inputs always pass; the regex exists to guard against poisoned
+ * upstream callers (review §T-2).
+ */
+const ENTITY_ID_RE = /^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/;
+
+/**
+ * Dangerous "domain" names — `__proto__`, `constructor`, `prototype`.
+ * Even though the regex would pass `__proto__.x`, the resulting
+ * `entry.domains['__proto__']` assignment is the prototype setter on
+ * a plain object — that's exactly the surface §S-2 closed. Reject the
+ * domain explicitly so trackTap remains a hardened input boundary.
+ */
+const DANGEROUS_DOMAINS = new Set(['__proto__', 'constructor', 'prototype']);
+
+/**
  * Record a tap on the given entity. Idempotent and silent on failure
- * — never throws back into the host card.
+ * — never throws back into the host card. Rejects entity IDs that
+ * don't match HA's canonical shape OR use a dangerous domain
+ * (closes review §T-2).
  */
 export function trackTap(entityId: string | undefined): void {
   if (!entityId || typeof entityId !== 'string') return;
+  if (!ENTITY_ID_RE.test(entityId)) return;
+  const domain = entityId.split('.')[0] ?? '';
+  if (DANGEROUS_DOMAINS.has(domain)) return;
   const entry = read();
   if (Object.keys(entry.entities).length >= MAX_ENTRIES && !(entityId in entry.entities)) {
     return; // cap pathological cases
   }
-  const domain = entityId.split('.')[0] ?? 'unknown';
   entry.entities[entityId] = (entry.entities[entityId] ?? 0) + 1;
   entry.domains[domain] = (entry.domains[domain] ?? 0) + 1;
   entry.total += 1;

@@ -105,7 +105,16 @@ jobs:
           }
           echo "Bundle-size budget (gzipped):"
           check "oriel.js.gz" 5
-          check "oriel-core.*.js.gz" 50
+          # v4.6.0 — core budget raised from 50 → 60 KB to absorb:
+          #   - Extension API v2 helpers (escapeHtml, isValidShape,
+          #     attribution-footer) staying in the registry module that
+          #     loads at strategy generate-time
+          #   - ~50 new translation keys (health.* + favorites_* +
+          #     live_preview_* + viewport_*) which bundle into core via
+          #     localize.ts's static JSON imports
+          # Growth is ~2KB gzipped; budget set with headroom for future
+          # locale expansion without churning this file on every PR.
+          check "oriel-core.*.js.gz" 60
           check "oriel-views.*.js.gz" 20
           check "oriel-editor.*.js.gz" 80
           check "oriel-lit.*.js.gz" 25
