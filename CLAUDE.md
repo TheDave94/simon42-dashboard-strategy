@@ -212,7 +212,7 @@ When PRs were created against the old codebase and cannot be merged directly:
 
 **The user picks direction. You pick implementation.**
 
-Stop and surface when:
+**Stop and surface when:**
 
 - Scope grew past the spec.
 - Two valid paths exist and the choice changes the product.
