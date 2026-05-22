@@ -219,7 +219,7 @@ When PRs were created against the old codebase and cannot be merged directly:
 
 **Investigate before deciding.** When evidence is missing, gather it read-only and report findings — don't guess and ship.
 
-**Audits are how the docs stay honest.** Run them deliberately; treat findings as evidence, not action items.
+**Audits are how the docs stay honest.** Run them deliberately; treat findings as evidence, not action items. Audits happen when docs get used, not on a schedule — trying to follow an instruction or use a reference is itself an audit, and drift surfaces under pressure of actual use. When you notice a doc claim doesn't match reality during normal work, treat it as an audit finding: open a follow-up, don't paper over.
 
 **The user picks direction. You pick implementation.**
 
