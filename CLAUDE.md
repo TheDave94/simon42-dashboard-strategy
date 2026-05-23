@@ -255,6 +255,14 @@ All custom cards (SummaryCard, LightsGroupCard, CoversGroupCard) use LitElement 
 ### Climate Summary Default: Off
 `show_climate_summary` defaults to `false` because not every user has thermostats. All other summaries (lights, covers, security, batteries) default to on.
 
+## Knowledge map
+
+In-repo docs and when to load each. Inline references to these files elsewhere in CLAUDE.md remain authoritative for context-specific use; the table below is the index.
+
+| File | When to load |
+|------|--------------|
+| `EXTERNAL_COUPLING.md` | Renaming or removing a config field that Oriel reads from HA entities; any house_mode-related work; any change to the dashboard-rename detection story. Mirrored verbatim from the HA-config repo — both repos own the contract. |
+
 ## References
 
 Local reference copies for architecture and pattern lookup (sparse checkouts, read-only):
