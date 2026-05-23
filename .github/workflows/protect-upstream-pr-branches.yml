@@ -1,0 +1,95 @@
+# ============================================================================
+# Smoke alarm: branch deletions that cascade-close upstream PRs
+# ============================================================================
+# This repo hosts head branches for open PRs in
+# TheRealSimon42/simon42-dashboard-strategy. When such a branch is deleted
+# here, GitHub auto-closes the upstream PR — silently, with the deleting
+# account as the recorded close actor. 49 PRs were silently closed this way
+# on 2026-05-19 and 2026-05-22 before this guard existed.
+#
+# What this workflow does
+#   - Fires on every branch deletion in this repo.
+#   - Queries the upstream repo for any PR whose head was
+#     TheDave94:<deleted-branch>, regardless of state.
+#   - If a match exists, fails the workflow run with a recovery command
+#     pre-formed against the upstream PR's headRefOid.
+#
+# What this workflow CANNOT do
+#   - Prevent the deletion. GitHub does not expose a pre-delete hook on
+#     standard repos. By the time `delete` events fire the branch is gone.
+#   - Read the deleted SHA from the event payload. The `delete` webhook
+#     payload only carries the ref name + ref_type — no SHA. The recovery
+#     SHA comes from the upstream PR's `head.sha` (which survives PR
+#     closure) instead.
+#
+# Treat a failed run from this workflow as a hard stop: recover the branch
+# (the failure log shows the exact `git push <sha>:refs/heads/<branch>`
+# command) and reopen the upstream PR before doing anything else.
+#
+# See CLAUDE.md → "Cross-fork PR safety" for the discipline rule, and
+# docs/protected-branches.md for the human-readable register of currently-
+# protected branches.
+# ============================================================================
+
+name: Protect upstream PR head branches
+
+on:
+  delete:
+
+jobs:
+  check-upstream-pr:
+    name: Check for cascaded upstream PR
+    # delete events fire for both branches and tags; we only care about
+    # branches. ref_type == 'tag' early-exits the job entirely.
+    if: github.event.ref_type == 'branch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      DELETED_BRANCH: ${{ github.event.ref }}
+      UPSTREAM: TheRealSimon42/simon42-dashboard-strategy
+      FORK_OWNER: TheDave94
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Query upstream for matching PR head
+        run: |
+          set -euo pipefail
+          echo "::group::Context"
+          echo "Deleted branch:    $DELETED_BRANCH"
+          echo "Upstream repo:     $UPSTREAM"
+          echo "Sender:            ${{ github.event.sender.login }}"
+          echo "Pusher type:       ${{ github.event.pusher_type }}"
+          echo "::endgroup::"
+
+          # The REST API head filter accepts owner:branch. We query state=all
+          # because the upstream close cascade may have already fired by the
+          # time this workflow starts running — a "closed" hit with a recent
+          # closed_at is still actionable. The headRefOid in the response is
+          # the recovery handle (the SHA the upstream PR was pointing at).
+          response=$(gh api -H "Accept: application/vnd.github+json" \
+            "/repos/$UPSTREAM/pulls?head=$FORK_OWNER:$DELETED_BRANCH&state=all&per_page=10")
+
+          # Reduce to a tab-separated list of actionable fields.
+          matches=$(jq -r '.[] | "\(.number)\t\(.state)\t\(.head.sha)\t\(.closed_at // "")\t\(.title)"' <<<"$response")
+
+          if [ -z "$matches" ]; then
+            echo "::notice::No upstream PRs matched head=$FORK_OWNER:$DELETED_BRANCH. Deletion is safe."
+            exit 0
+          fi
+
+          echo "::error::Branch deletion may have cascaded to upstream PR(s) in $UPSTREAM"
+          echo ""
+          echo "Matched PR(s):"
+          while IFS=$'\t' read -r num state sha closed_at title; do
+            echo "  #$num [$state] sha=$sha closed_at=${closed_at:-—}"
+            echo "    title: $title"
+          done <<<"$matches"
+          echo ""
+          echo "RECOVERY — run from a local checkout of $GITHUB_REPOSITORY:"
+          while IFS=$'\t' read -r num state sha _closed_at _title; do
+            echo "  git push origin $sha:refs/heads/$DELETED_BRANCH"
+            echo "  gh pr reopen $num --repo $UPSTREAM"
+            echo ""
+          done <<<"$matches"
+          echo "After recovery, refresh docs/protected-branches.md per its header procedure."
+          exit 1
