@@ -339,6 +339,8 @@
     "room_pins_position_bottom": "Bottom (below other sections)",
     "room_pins_position_desc": "Where the Room Pins section appears in each room view. \"Top\" matches the documentation and the original intent; \"Bottom\" preserves the legacy ordering for dashboards that relied on it.",
     "section_views": "Views",
+    "theme": "Dashboard theme",
+    "theme_desc": "Applies a Home Assistant theme to every Oriel view — colors and background, like a normal dashboard's theme. Leave on \"Backend-selected theme\" to inherit your global theme.",
     "show_summary_views": "Show summary views",
     "show_summary_views_desc": "Shows the summary views (Lights, Covers, Security, Batteries) in the top navigation.",
     "show_room_views": "Show room views",

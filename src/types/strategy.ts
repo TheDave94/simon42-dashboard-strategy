@@ -271,6 +271,12 @@ export interface OrielConfig {
    */
   dashboard_density?: 'compact' | 'comfortable';
   /**
+   * HA theme applied to every generated view (#74). Changes colors +
+   * background like HA's native per-dashboard theme. Unset → inherit
+   * the user's global theme. Value is an installed HA theme name.
+   */
+  theme?: string;
+  /**
    * Strategy-wide layout density preset. Distinct from
    * `dashboard_density` (which is the per-card token override):
    * `density` controls the *grid sizing* the strategy emits —

@@ -339,6 +339,8 @@
     "room_pins_position_desc": "Wo der Raum-Pins-Abschnitt in jeder Raum-Ansicht erscheint. „Oben“ entspricht der Dokumentation und der ursprünglichen Absicht; „Unten“ erhält die bisherige Reihenfolge für Dashboards, die darauf basierten.",
     "room_pins_desc": "Wähle Entitäten aus, die in ihren zugeordneten Räumen als erstes angezeigt werden sollen. Ideal für Entitäten die normalerweise nicht automatisch erfasst werden (z.B. Wetterstationen, spezielle Sensoren). <strong>Nur Entitäten mit Raum-Zuordnung können ausgewählt werden.</strong> Diese Pins erscheinen nur im jeweiligen Raum, nicht in der Übersicht.",
     "section_views": "Ansichten",
+    "theme": "Dashboard-Theme",
+    "theme_desc": "Wendet ein Home-Assistant-Theme auf alle Oriel-Ansichten an — Farben und Hintergrund, wie das Theme eines normalen Dashboards. Auf „Vom Backend gewähltes Theme“ lassen, um das globale Theme zu übernehmen.",
     "show_summary_views": "Zusammenfassungs-Views anzeigen",
     "show_summary_views_desc": "Zeigt die Zusammenfassungs-Views (Lichter, Rollos, Sicherheit, Batterien) in der oberen Navigation an.",
     "show_room_views": "Raum-Views anzeigen",

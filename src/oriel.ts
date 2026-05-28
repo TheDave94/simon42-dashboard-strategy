@@ -376,9 +376,16 @@ class Oriel extends HTMLElement {
     // forward it verbatim so users can reference templates by name
     // from custom_cards / custom_views.
     const decluttering = config.decluttering_templates;
+    // Apply the configured HA theme to every view (#74) — colors +
+    // background, like HA's native per-dashboard theme. Unset → views
+    // inherit the user's global theme.
+    const themedViews = config.theme
+      ? views.map((v) => ({ ...v, theme: config.theme }))
+      : views;
+
     return {
       title: localize('dashboard.title'),
-      views,
+      views: themedViews,
       ...(decluttering && Object.keys(decluttering).length > 0
         ? { decluttering_templates: decluttering }
         : {}),

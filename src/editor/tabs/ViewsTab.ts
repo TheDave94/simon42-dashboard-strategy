@@ -45,6 +45,10 @@ const VIEWS_SCHEMA = [
   { name: 'show_room_views', selector: { boolean: {} } },
 ] as const;
 
+// HA-native theme picker — populates from the user's installed themes and
+// includes a "no theme" (inherit global) option (#74).
+const THEME_SCHEMA = [{ name: 'theme', selector: { theme: {} } }] as const;
+
 export function renderViewsTab(ctx: TabRenderContext): TemplateResult {
   const { hass, config, onChange } = ctx;
 
@@ -77,6 +81,17 @@ export function renderViewsTab(ctx: TabRenderContext): TemplateResult {
             patch[key] = v === true ? true : undefined;
           }
           onChange(patch);
+        }}
+      ></ha-form>
+      <ha-form
+        .hass=${hass}
+        .data=${{ theme: config.theme }}
+        .schema=${THEME_SCHEMA}
+        .computeLabel=${() => localize('editor.theme')}
+        .computeHelper=${() => localize('editor.theme_desc')}
+        @value-changed=${(ev: CustomEvent<{ value: { theme?: string } }>) => {
+          // Empty / "no theme" → undefined so the saved config stays sparse.
+          onChange({ theme: ev.detail.value.theme || undefined });
         }}
       ></ha-form>
     </div>
