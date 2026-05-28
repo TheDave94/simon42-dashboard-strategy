@@ -320,6 +320,8 @@
     "show_window_contacts_in_rooms_desc": "Shows window contacts as badges in the respective room views.",
     "show_door_contacts_in_rooms": "Show door contacts in room views",
     "show_door_contacts_in_rooms_desc": "Shows door contacts as badges in the respective room views.",
+    "room_section_order": "Room section order",
+    "room_section_order_desc": "Reorder the entity-group sections within every room view (e.g. put Scenes above Lighting). Camera, room-mode, pins, and presence keep their fixed positions. Empty groups auto-hide.",
     "use_entity_name": "Entity name only",
     "use_entity_name_desc": "Shows the entity name only on room tiles, instead of HA's \"Device › Entity\" scheme (HA 2026.02+). Useful when devices have cryptic names — e.g. \"Plug Washing Machine Washing Machine\" becomes \"Washing Machine\".",
     "use_default_area_sort": "Use Home Assistant sorting",
