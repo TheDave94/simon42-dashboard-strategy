@@ -180,6 +180,8 @@ export interface OrielConfig {
   room_camera_companions?: Array<'light' | 'motion' | 'siren' | 'battery' | 'doorbell'>;
   show_window_contacts_in_rooms?: boolean; // default: true (opt-out — set false to hide window contact badges)
   show_door_contacts_in_rooms?: boolean; // default: true (opt-out — set false to hide door contact badges)
+  area_hold_shows_scenes?: boolean; // default: false — long-press an area card to
+  // open a scene menu (wraps the native area card in oriel-area-card) (#150)
   show_switches_on_areas?: boolean; // default: false
   show_alerts_on_areas?: boolean; // default: false
   show_person_badges?: boolean; // default: true — set false to suppress the

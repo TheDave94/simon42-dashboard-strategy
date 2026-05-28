@@ -298,6 +298,8 @@
     "show_window_contacts_in_rooms_desc": "Zeigt Fensterkontakte als Badges in den jeweiligen Raum-Ansichten an.",
     "show_door_contacts_in_rooms": "Türkontakte in Raum-Ansichten anzeigen",
     "show_door_contacts_in_rooms_desc": "Zeigt Türkontakte als Badges in den jeweiligen Raum-Ansichten an.",
+    "area_hold_shows_scenes": "Langes Drücken zeigt Szenen",
+    "area_hold_shows_scenes_desc": "Langes Drücken (Halten) auf eine Bereichskarte in der Übersicht öffnet ein Menü mit den Szenen des Bereichs; zum Aktivieren eine antippen. Nur Bereiche mit zugewiesenen Szenen erhalten das Menü; Tippen und die Bereichs-Steuerelemente funktionieren weiterhin normal.",
     "use_default_area_sort": "Home Assistant Sortierung verwenden",
     "use_default_area_sort_desc": "Verwendet die Sortierung der Bereiche aus Home Assistant anstelle der hier konfigurierten Reihenfolge.",
     "areas_manage_desc": "Wähle aus, welche Bereiche im Dashboard angezeigt werden sollen und in welcher Reihenfolge. Klappe Bereiche auf, um einzelne Entitäten zu verwalten.",
