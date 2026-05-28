@@ -33,7 +33,8 @@
     "covers": "Blinds & Covers",
     "security": "Security",
     "batteries": "Batteries",
-    "climate": "Climate"
+    "climate": "Climate",
+    "cameras": "Cameras"
   },
   "sections": {
     "overview": "Overview",
@@ -121,6 +122,9 @@
     "cooling": "Cooling",
     "idle": "Idle",
     "off": "Off"
+  },
+  "camera": {
+    "no_area": "Unassigned"
   },
   "room": {
     "cameras": "Cameras",
@@ -261,6 +265,8 @@
     "unavailable_batteries_critical": "Show as critical (alerts you to broken sensors)",
     "unavailable_batteries_good": "Show as good (silences offline devices)",
     "unavailable_batteries_bucket_desc": "Where to bucket battery entities whose state is unavailable, unknown, or non-numeric. \"Critical\" makes broken sensors visible; \"Good\" hides them so they don't inflate the critical count.",
+    "show_camera_view": "Show camera overview",
+    "show_camera_view_desc": "Adds a Cameras view collecting every camera onto one screen, grouped by area. Off by default. Cameras still appear in their room views regardless of this setting.",
     "section_info_cards": "Info Cards",
     "show_weather": "Show weather card",
     "show_weather_desc": "Shows the weather forecast card on the overview when a weather entity is available.",

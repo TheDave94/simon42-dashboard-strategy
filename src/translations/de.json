@@ -33,7 +33,8 @@
     "covers": "Rollos & Abdeckungen",
     "security": "Sicherheit",
     "batteries": "Batterien",
-    "climate": "Klima"
+    "climate": "Klima",
+    "cameras": "Kameras"
   },
   "sections": {
     "overview": "Übersicht",
@@ -121,6 +122,9 @@
     "cooling": "Kühlen",
     "idle": "Bereitschaft",
     "off": "Aus"
+  },
+  "camera": {
+    "no_area": "Ohne Bereich"
   },
   "room": {
     "cameras": "Kameras",
@@ -261,6 +265,8 @@
     "unavailable_batteries_critical": "Als kritisch anzeigen (macht defekte Sensoren sichtbar)",
     "unavailable_batteries_good": "Als gut anzeigen (versteckt Offline-Geräte)",
     "unavailable_batteries_bucket_desc": "Wohin Batterie-Entitäten mit Status „unavailable“, „unknown“ oder nicht-numerischem Wert sortiert werden. „Kritisch“ macht defekte Sensoren sichtbar; „Gut“ versteckt sie, damit sie den Kritisch-Zähler nicht aufblähen.",
+    "show_camera_view": "Kamera-Übersicht anzeigen",
+    "show_camera_view_desc": "Fügt eine Kamera-Ansicht hinzu, die alle Kameras auf einem Bildschirm nach Bereich gruppiert. Standardmäßig aus. Kameras erscheinen unabhängig davon weiterhin in ihren Raum-Ansichten.",
     "section_info_cards": "Info-Karten",
     "show_weather": "Wetter-Karte anzeigen",
     "show_weather_desc": "Zeigt die Wettervorhersage-Karte in der Übersicht an, wenn eine Wetter-Entität verfügbar ist.",

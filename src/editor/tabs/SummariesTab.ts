@@ -57,6 +57,7 @@ interface SummariesData {
   battery_critical_threshold: number;
   battery_low_threshold: number;
   unavailable_batteries_bucket: BatteriesBucket;
+  show_camera_view: boolean;
 }
 
 function readData(c: OrielConfig): SummariesData {
@@ -79,6 +80,7 @@ function readData(c: OrielConfig): SummariesData {
     battery_critical_threshold: c.battery_critical_threshold ?? 20,
     battery_low_threshold: c.battery_low_threshold ?? 50,
     unavailable_batteries_bucket: c.unavailable_batteries_bucket === 'critical' ? 'critical' : 'good',
+    show_camera_view: c.show_camera_view === true,
   };
 }
 
@@ -139,6 +141,7 @@ const SCHEMA = [
       },
     },
   },
+  { name: 'show_camera_view', selector: { boolean: {} } },
 ] as const;
 
 function buildPatch(v: Partial<SummariesData>): Partial<OrielConfig> {
@@ -177,6 +180,9 @@ function buildPatch(v: Partial<SummariesData>): Partial<OrielConfig> {
     typeof v.battery_low_threshold === 'number' && v.battery_low_threshold !== 50
       ? v.battery_low_threshold
       : undefined;
+
+  // camera overview — default-false boolean → persist true.
+  p.show_camera_view = v.show_camera_view === true ? true : undefined;
 
   return p;
 }

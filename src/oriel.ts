@@ -71,6 +71,7 @@ const modulesPromise = Promise.all([
   import('./views/SecurityViewStrategy'),
   import('./views/BatteriesViewStrategy'),
   import('./views/ClimateViewStrategy'),
+  import('./views/CameraViewStrategy'),
   import('./views/RoomViewStrategy'),
 ]);
 
@@ -148,6 +149,7 @@ class Oriel extends HTMLElement {
     const showSecurity = config.show_security_summary !== false;
     const showBatteries = config.show_battery_summary !== false;
     const showClimate = config.show_climate_summary === true;
+    const showCamera = config.show_camera_view === true;
 
     // Pre-resolve ALL views upfront (like HA's Home Panel does)
     const overviewConfig = await getStrategy('ll-strategy-view-oriel-overview').generate(
@@ -169,6 +171,8 @@ class Oriel extends HTMLElement {
         resolve: () => getStrategy('ll-strategy-view-oriel-batteries').generate({ config }, hass) },
       { enabled: showClimate, title: localize('views.climate'), path: 'climate', icon: 'mdi:thermostat',
         resolve: () => getStrategy('ll-strategy-view-oriel-climate').generate({ config }, hass) },
+      { enabled: showCamera, title: localize('views.cameras'), path: 'cameras', icon: 'mdi:cctv',
+        resolve: () => getStrategy('ll-strategy-view-oriel-camera').generate({ config }, hass) },
     ];
 
     const enabledDefs = utilityViewDefs.filter((d) => d.enabled);
