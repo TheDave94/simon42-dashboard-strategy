@@ -6,6 +6,18 @@ Full release notes with diffs and asset bundles: [GitHub releases](https://githu
 
 ---
 
+## [4.13.0](https://github.com/TheDave94/oriel-dashboard/compare/v4.12.3...v4.13.0) (2026-05-28)
+
+
+### Features
+
+* state-gated favorites (show_when / visibility) ([#89](https://github.com/TheDave94/oriel-dashboard/issues/89)) ([9092d24](https://github.com/TheDave94/oriel-dashboard/commit/9092d248b6b6a1f1aecbcd5e7325f4c7627e38cc))
+
+
+### Bug Fixes
+
+* single-column summary tiles on phone (full names, no truncation) ([#87](https://github.com/TheDave94/oriel-dashboard/issues/87)) ([1c5bb8d](https://github.com/TheDave94/oriel-dashboard/commit/1c5bb8d26ad9cce24fe0db8598d3d504624ae694))
+
 ## [4.12.3](https://github.com/TheDave94/oriel-dashboard/compare/v4.12.2...v4.12.3) (2026-05-28)
 
 
