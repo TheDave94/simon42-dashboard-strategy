@@ -71,6 +71,7 @@ const modulesPromise = Promise.all([
   import('./views/SecurityViewStrategy'),
   import('./views/BatteriesViewStrategy'),
   import('./views/ClimateViewStrategy'),
+  import('./views/CameraViewStrategy'),
   import('./views/HumidityViewStrategy'),
   import('./views/RoomViewStrategy'),
 ]);
@@ -186,6 +187,7 @@ class Oriel extends HTMLElement {
     const showSecurity = config.show_security_summary !== false;
     const showBatteries = config.show_battery_summary !== false;
     const showClimate = config.show_climate_summary === true;
+    const showCamera = config.show_camera_view === true;
     const showHumidity = config.show_humidity_summary === true;
 
     // Pre-resolve ALL views upfront (like HA's Home Panel does)
@@ -208,6 +210,8 @@ class Oriel extends HTMLElement {
         resolve: () => getStrategy('ll-strategy-view-oriel-batteries').generate({ config }, hass) },
       { enabled: showClimate, title: localize('views.climate'), path: 'climate', icon: 'mdi:thermostat',
         resolve: () => getStrategy('ll-strategy-view-oriel-climate').generate({ config }, hass) },
+      { enabled: showCamera, title: localize('views.cameras'), path: 'cameras', icon: 'mdi:cctv',
+        resolve: () => getStrategy('ll-strategy-view-oriel-camera').generate({ config }, hass) },
       { enabled: showHumidity, title: localize('views.humidity'), path: 'humidity', icon: 'mdi:water-percent',
         resolve: () => getStrategy('ll-strategy-view-oriel-humidity').generate({ config }, hass) },
     ];

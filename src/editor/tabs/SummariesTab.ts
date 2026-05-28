@@ -57,6 +57,7 @@ interface SummariesData {
   battery_critical_threshold: number;
   battery_low_threshold: number;
   unavailable_batteries_bucket: BatteriesBucket;
+  show_camera_view: boolean;
   show_humidity_summary: boolean;
   humidity_low_threshold: number;
   humidity_high_threshold: number;
@@ -82,6 +83,7 @@ function readData(c: OrielConfig): SummariesData {
     battery_critical_threshold: c.battery_critical_threshold ?? 20,
     battery_low_threshold: c.battery_low_threshold ?? 50,
     unavailable_batteries_bucket: c.unavailable_batteries_bucket === 'critical' ? 'critical' : 'good',
+    show_camera_view: c.show_camera_view === true,
     show_humidity_summary: c.show_humidity_summary === true,
     humidity_low_threshold: c.humidity_low_threshold ?? 30,
     humidity_high_threshold: c.humidity_high_threshold ?? 60,
@@ -145,6 +147,7 @@ const SCHEMA = [
       },
     },
   },
+  { name: 'show_camera_view', selector: { boolean: {} } },
   { name: 'show_humidity_summary', selector: { boolean: {} } },
   {
     name: 'humidity_low_threshold',
@@ -192,6 +195,9 @@ function buildPatch(v: Partial<SummariesData>): Partial<OrielConfig> {
     typeof v.battery_low_threshold === 'number' && v.battery_low_threshold !== 50
       ? v.battery_low_threshold
       : undefined;
+
+  // camera overview — default-false boolean → persist true.
+  p.show_camera_view = v.show_camera_view === true ? true : undefined;
 
   // humidity — default-false boolean → persist true; numbers → persist non-default.
   p.show_humidity_summary = v.show_humidity_summary === true ? true : undefined;

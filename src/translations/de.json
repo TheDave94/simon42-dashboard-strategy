@@ -34,6 +34,7 @@
     "security": "Sicherheit",
     "batteries": "Batterien",
     "climate": "Klima",
+    "cameras": "Kameras",
     "humidity": "Luftfeuchtigkeit"
   },
   "sections": {
@@ -122,6 +123,9 @@
     "cooling": "Kühlen",
     "idle": "Bereitschaft",
     "off": "Aus"
+  },
+  "camera": {
+    "no_area": "Ohne Bereich"
   },
   "humidity": {
     "dry": "Trocken",
@@ -271,6 +275,8 @@
     "unavailable_batteries_critical": "Als kritisch anzeigen (macht defekte Sensoren sichtbar)",
     "unavailable_batteries_good": "Als gut anzeigen (versteckt Offline-Geräte)",
     "unavailable_batteries_bucket_desc": "Wohin Batterie-Entitäten mit Status „unavailable“, „unknown“ oder nicht-numerischem Wert sortiert werden. „Kritisch“ macht defekte Sensoren sichtbar; „Gut“ versteckt sie, damit sie den Kritisch-Zähler nicht aufblähen.",
+    "show_camera_view": "Kamera-Übersicht anzeigen",
+    "show_camera_view_desc": "Fügt eine Kamera-Ansicht hinzu, die alle Kameras auf einem Bildschirm nach Bereich gruppiert. Standardmäßig aus. Kameras erscheinen unabhängig davon weiterhin in ihren Raum-Ansichten.",
     "show_humidity_summary": "Luftfeuchtigkeits-Übersicht anzeigen",
     "show_humidity_summary_desc": "Fügt eine Luftfeuchtigkeits-Ansicht hinzu, die Sensoren in Trocken / Komfortabel / Feucht gruppiert. Standardmäßig aus — aktiviere sie, wenn du Feuchtigkeitssensoren hast. Leere Gruppen werden automatisch ausgeblendet.",
     "humidity_low_threshold": "Trocken unter",
