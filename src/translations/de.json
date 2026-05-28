@@ -33,7 +33,8 @@
     "covers": "Rollos & Abdeckungen",
     "security": "Sicherheit",
     "batteries": "Batterien",
-    "climate": "Klima"
+    "climate": "Klima",
+    "humidity": "Luftfeuchtigkeit"
   },
   "sections": {
     "overview": "Übersicht",
@@ -121,6 +122,13 @@
     "cooling": "Kühlen",
     "idle": "Bereitschaft",
     "off": "Aus"
+  },
+  "humidity": {
+    "dry": "Trocken",
+    "comfortable": "Komfortabel",
+    "humid": "Feucht",
+    "sensor_one": "Sensor",
+    "sensor_many": "Sensoren"
   },
   "room": {
     "cameras": "Kameras",
@@ -261,6 +269,12 @@
     "unavailable_batteries_critical": "Als kritisch anzeigen (macht defekte Sensoren sichtbar)",
     "unavailable_batteries_good": "Als gut anzeigen (versteckt Offline-Geräte)",
     "unavailable_batteries_bucket_desc": "Wohin Batterie-Entitäten mit Status „unavailable“, „unknown“ oder nicht-numerischem Wert sortiert werden. „Kritisch“ macht defekte Sensoren sichtbar; „Gut“ versteckt sie, damit sie den Kritisch-Zähler nicht aufblähen.",
+    "show_humidity_summary": "Luftfeuchtigkeits-Übersicht anzeigen",
+    "show_humidity_summary_desc": "Fügt eine Luftfeuchtigkeits-Ansicht hinzu, die Sensoren in Trocken / Komfortabel / Feucht gruppiert. Standardmäßig aus — aktiviere sie, wenn du Feuchtigkeitssensoren hast. Leere Gruppen werden automatisch ausgeblendet.",
+    "humidity_low_threshold": "Trocken unter",
+    "humidity_low_threshold_desc": "Messwerte unter diesem Prozentwert werden als „Trocken“ gruppiert.",
+    "humidity_high_threshold": "Feucht über",
+    "humidity_high_threshold_desc": "Messwerte über diesem Prozentwert werden als „Feucht“ gruppiert; dazwischen liegt „Komfortabel“.",
     "section_info_cards": "Info-Karten",
     "show_weather": "Wetter-Karte anzeigen",
     "show_weather_desc": "Zeigt die Wettervorhersage-Karte in der Übersicht an, wenn eine Wetter-Entität verfügbar ist.",

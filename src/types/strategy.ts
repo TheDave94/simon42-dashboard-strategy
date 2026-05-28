@@ -162,6 +162,9 @@ export interface OrielConfig {
   battery_low_threshold?: number; // default: 50
   show_area_in_battery_view?: boolean; // default: false
   unavailable_batteries_bucket?: 'critical' | 'good'; // default: 'good'
+  show_humidity_summary?: boolean; // default: false
+  humidity_low_threshold?: number; // default: 30 (below = Dry)
+  humidity_high_threshold?: number; // default: 60 (above = Humid)
   show_locks_in_rooms?: boolean; // default: false
   show_automations_in_rooms?: boolean; // default: false
   show_scripts_in_rooms?: boolean; // default: false

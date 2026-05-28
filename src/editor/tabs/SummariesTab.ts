@@ -57,6 +57,9 @@ interface SummariesData {
   battery_critical_threshold: number;
   battery_low_threshold: number;
   unavailable_batteries_bucket: BatteriesBucket;
+  show_humidity_summary: boolean;
+  humidity_low_threshold: number;
+  humidity_high_threshold: number;
 }
 
 function readData(c: OrielConfig): SummariesData {
@@ -79,6 +82,9 @@ function readData(c: OrielConfig): SummariesData {
     battery_critical_threshold: c.battery_critical_threshold ?? 20,
     battery_low_threshold: c.battery_low_threshold ?? 50,
     unavailable_batteries_bucket: c.unavailable_batteries_bucket === 'critical' ? 'critical' : 'good',
+    show_humidity_summary: c.show_humidity_summary === true,
+    humidity_low_threshold: c.humidity_low_threshold ?? 30,
+    humidity_high_threshold: c.humidity_high_threshold ?? 60,
   };
 }
 
@@ -139,6 +145,15 @@ const SCHEMA = [
       },
     },
   },
+  { name: 'show_humidity_summary', selector: { boolean: {} } },
+  {
+    name: 'humidity_low_threshold',
+    selector: { number: { min: 1, max: 99, step: 1, unit_of_measurement: '%', mode: 'box' } },
+  },
+  {
+    name: 'humidity_high_threshold',
+    selector: { number: { min: 1, max: 99, step: 1, unit_of_measurement: '%', mode: 'box' } },
+  },
 ] as const;
 
 function buildPatch(v: Partial<SummariesData>): Partial<OrielConfig> {
@@ -176,6 +191,17 @@ function buildPatch(v: Partial<SummariesData>): Partial<OrielConfig> {
   p.battery_low_threshold =
     typeof v.battery_low_threshold === 'number' && v.battery_low_threshold !== 50
       ? v.battery_low_threshold
+      : undefined;
+
+  // humidity — default-false boolean → persist true; numbers → persist non-default.
+  p.show_humidity_summary = v.show_humidity_summary === true ? true : undefined;
+  p.humidity_low_threshold =
+    typeof v.humidity_low_threshold === 'number' && v.humidity_low_threshold !== 30
+      ? v.humidity_low_threshold
+      : undefined;
+  p.humidity_high_threshold =
+    typeof v.humidity_high_threshold === 'number' && v.humidity_high_threshold !== 60
+      ? v.humidity_high_threshold
       : undefined;
 
   return p;

@@ -33,7 +33,8 @@
     "covers": "Blinds & Covers",
     "security": "Security",
     "batteries": "Batteries",
-    "climate": "Climate"
+    "climate": "Climate",
+    "humidity": "Humidity"
   },
   "sections": {
     "overview": "Overview",
@@ -121,6 +122,13 @@
     "cooling": "Cooling",
     "idle": "Idle",
     "off": "Off"
+  },
+  "humidity": {
+    "dry": "Dry",
+    "comfortable": "Comfortable",
+    "humid": "Humid",
+    "sensor_one": "sensor",
+    "sensor_many": "sensors"
   },
   "room": {
     "cameras": "Cameras",
@@ -261,6 +269,12 @@
     "unavailable_batteries_critical": "Show as critical (alerts you to broken sensors)",
     "unavailable_batteries_good": "Show as good (silences offline devices)",
     "unavailable_batteries_bucket_desc": "Where to bucket battery entities whose state is unavailable, unknown, or non-numeric. \"Critical\" makes broken sensors visible; \"Good\" hides them so they don't inflate the critical count.",
+    "show_humidity_summary": "Show humidity summary",
+    "show_humidity_summary_desc": "Adds a Humidity overview view grouping humidity sensors into Dry / Comfortable / Humid buckets. Off by default — enable it if you have humidity sensors. Buckets with no sensors are auto-hidden.",
+    "humidity_low_threshold": "Dry below",
+    "humidity_low_threshold_desc": "Humidity readings below this percentage are grouped as \"Dry\".",
+    "humidity_high_threshold": "Humid above",
+    "humidity_high_threshold_desc": "Humidity readings above this percentage are grouped as \"Humid\"; in between is \"Comfortable\".",
     "section_info_cards": "Info Cards",
     "show_weather": "Show weather card",
     "show_weather_desc": "Shows the weather forecast card on the overview when a weather entity is available.",
