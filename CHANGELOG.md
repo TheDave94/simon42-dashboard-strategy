@@ -6,6 +6,15 @@ Full release notes with diffs and asset bundles: [GitHub releases](https://githu
 
 ---
 
+## [4.12.0](https://github.com/TheDave94/oriel-dashboard/compare/v4.11.0...v4.12.0) (2026-05-28)
+
+
+### Features
+
+* configurable dashboard theme ([#78](https://github.com/TheDave94/oriel-dashboard/issues/78)) ([058cf23](https://github.com/TheDave94/oriel-dashboard/commit/058cf2362e170646ddd192d3c501751d963bae82))
+* dashboard background customization ([#80](https://github.com/TheDave94/oriel-dashboard/issues/80)) ([afe87e5](https://github.com/TheDave94/oriel-dashboard/commit/afe87e54ed1c511fd89bc0a85c8b4c3ff30367a4))
+* long-press area card to activate scenes (oriel-area-card) ([#72](https://github.com/TheDave94/oriel-dashboard/issues/72)) ([4130c5a](https://github.com/TheDave94/oriel-dashboard/commit/4130c5ac4b7f3bbb10299a5951fbf27c9ea0e43a))
+
 ## [4.11.0](https://github.com/TheDave94/oriel-dashboard/compare/v4.10.0...v4.11.0) (2026-05-28)
 
 
