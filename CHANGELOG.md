@@ -6,6 +6,13 @@ Full release notes with diffs and asset bundles: [GitHub releases](https://githu
 
 ---
 
+## [4.15.0](https://github.com/TheDave94/oriel-dashboard/compare/v4.14.0...v4.15.0) (2026-05-30)
+
+
+### Features
+
+* pollen card + active-pollen badges in weather section ([#95](https://github.com/TheDave94/oriel-dashboard/issues/95)) ([18e57e2](https://github.com/TheDave94/oriel-dashboard/commit/18e57e21ebece541d35712d2cf96ba06d6634d9d))
+
 ## [4.14.0](https://github.com/TheDave94/oriel-dashboard/compare/v4.13.0...v4.14.0) (2026-05-29)
 
 
