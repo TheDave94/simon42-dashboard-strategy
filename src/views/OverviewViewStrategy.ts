@@ -240,6 +240,14 @@ class OrielViewOverview extends HTMLElement {
           dashboardConfig.weather_sensors || [],
           dashboardConfig.weather_presentation,
           hiddenHeadings.has('weather'),
+          hass,
+          {
+            show: dashboardConfig.show_pollen === true,
+            source: dashboardConfig.pollen_source ?? 'analytics',
+            types: dashboardConfig.pollen_types,
+            presentation: dashboardConfig.pollen_presentation ?? 'consensus_tiles',
+            showBadges: dashboardConfig.show_pollen_badges === true,
+          },
         ),
       ],
       [

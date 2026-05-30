@@ -24,8 +24,11 @@ import type {
   EnergyPresentation,
   WeatherSensorConfig,
   FavoriteEntityEntry,
+  PollenPresentation,
+  PollenSource,
+  PollenType,
 } from '../types/strategy';
-import { DEFAULT_SECTIONS_ORDER, DEFAULT_ROOM_SECTION_ORDER } from '../types/strategy';
+import { DEFAULT_SECTIONS_ORDER, DEFAULT_ROOM_SECTION_ORDER, ALL_POLLEN_TYPES } from '../types/strategy';
 import type { AreaRegistryEntry, EntityRegistryEntry } from '../types/registries';
 import { localize } from '../utils/localize';
 import { isBadgeCandidate, isDefaultShowName, resolveShowName } from '../utils/badge-utils';
@@ -1845,6 +1848,54 @@ class OrielEditor extends LitElement {
     this._fireConfigChanged(newConfig);
   }
 
+  /**
+   * Persist pollen_source. Drops the key when it matches the default
+   * (`analytics`) so freshly-toggled-on dashboards stay sparse in YAML.
+   */
+  private _setPollenSource(value: PollenSource): void {
+    const newConfig: OrielConfig = { ...this._config };
+    if (value === 'analytics') delete newConfig.pollen_source;
+    else newConfig.pollen_source = value;
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+  }
+
+  /**
+   * Persist pollen_presentation. Drops the key when it matches the
+   * default layout (`consensus_tiles`).
+   */
+  private _setPollenPresentation(value: PollenPresentation): void {
+    const newConfig: OrielConfig = { ...this._config };
+    if (value === 'consensus_tiles') delete newConfig.pollen_presentation;
+    else newConfig.pollen_presentation = value;
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+  }
+
+  /**
+   * Add / remove a pollen type from the configured list. When the list
+   * ends up identical to ALL_POLLEN_TYPES the key is stripped so the
+   * "default = everything" intent stays implicit in the YAML.
+   */
+  private _togglePollenType(type: PollenType, enabled: boolean): void {
+    const current = new Set<PollenType>(this._config.pollen_types ?? ALL_POLLEN_TYPES);
+    if (enabled) current.add(type);
+    else current.delete(type);
+    // Preserve canonical order so YAML stays deterministic.
+    const next = ALL_POLLEN_TYPES.filter((t) => current.has(t));
+    const newConfig: OrielConfig = { ...this._config };
+    const matchesDefault =
+      next.length === ALL_POLLEN_TYPES.length &&
+      next.every((t, i) => t === ALL_POLLEN_TYPES[i]);
+    if (matchesDefault) {
+      delete newConfig.pollen_types;
+    } else {
+      newConfig.pollen_types = next;
+    }
+    this._config = newConfig;
+    this._fireConfigChanged(newConfig);
+  }
+
   private _renderSectionOrderPanel(): TemplateResult {
     // Section-order render template lives in a per-tab module; drag-drop
     // state + every mutator stays on the editor class. See
@@ -1869,6 +1920,9 @@ class OrielEditor extends LitElement {
       onToggleSectionVisibility: (k, v) => this._toggleSectionVisibility(k, v),
       onToggleHiddenHeading: (k, h) => this._toggleHiddenHeading(k, h),
       onStaleAfterChange: (m) => this._setStaleAfter(m),
+      onSetPollenSource: (v) => this._setPollenSource(v),
+      onSetPollenPresentation: (v) => this._setPollenPresentation(v),
+      onTogglePollenType: (t, e) => this._togglePollenType(t, e),
       onSectionVisibilityChange: (k, f, v) => this._sectionVisibilityChanged(k, f, v),
       onDragStart: this._handleSectionDragStart,
       onDragEnd: this._handleSectionDragEnd,

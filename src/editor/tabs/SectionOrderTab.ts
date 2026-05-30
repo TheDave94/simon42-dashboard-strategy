@@ -22,12 +22,21 @@ import { html, nothing, type TemplateResult } from 'lit';
 import type { HomeAssistant } from '../../types/homeassistant';
 import type {
   OrielConfig,
+  PollenPresentation,
+  PollenSource,
+  PollenType,
   SectionKey,
   WeatherPresentation,
   EnergyPresentation,
 } from '../../types/strategy';
+import { ALL_POLLEN_TYPES } from '../../types/strategy';
 import { localize } from '../../utils/localize';
 import { detectAvailable, type KnownCard } from '../../utils/section-card-registry';
+import {
+  detectAvailableSources,
+  detectAvailableTypes,
+  detectPollenwatchInstalled,
+} from '../../utils/pollen';
 
 export interface SectionMeta {
   icon: string;
@@ -60,6 +69,12 @@ export interface SectionOrderTabContext {
   onToggleHiddenHeading: (key: string, hide: boolean) => void;
   /** Set the shared staleness threshold (minutes). */
   onStaleAfterChange: (minutes: number) => void;
+  /** Pollen — pick which sub-source feeds the card. */
+  onSetPollenSource: (v: PollenSource) => void;
+  /** Pollen — pick which built-in layout the card renders. */
+  onSetPollenPresentation: (v: PollenPresentation) => void;
+  /** Pollen — toggle a single pollen type on/off in the configured list. */
+  onTogglePollenType: (type: PollenType, enabled: boolean) => void;
   onSectionVisibilityChange: (
     key: string,
     field: 'entity' | 'state' | 'role' | 'time_after' | 'time_before' | 'mode_entity' | 'mode_is',
@@ -341,7 +356,133 @@ function renderWeatherSub(
         `
       : nothing;
 
-  return html`${presentationDropdown}${entityDropdown}`;
+  return html`${presentationDropdown}${entityDropdown}${renderPollenSub(ctx)}`;
+}
+
+/**
+ * Pollen subgroup under the weather sub-editor. Auto-hides when the
+ * PollenWatch integration isn't installed — users without it never
+ * see the controls.
+ *
+ * The source dropdown lists only sub-sources that actually expose
+ * sensors. The type chips list only pollens detected at the chosen
+ * source so the user can't pick a type with no data behind it.
+ */
+function renderPollenSub(ctx: SectionOrderTabContext): TemplateResult | typeof nothing {
+  if (!detectPollenwatchInstalled(ctx.hass)) return nothing;
+
+  const showPollen = ctx.config.show_pollen === true;
+  const showPollenBadges = ctx.config.show_pollen_badges === true;
+  const source: PollenSource = ctx.config.pollen_source ?? 'analytics';
+  const presentation: PollenPresentation =
+    ctx.config.pollen_presentation ?? 'consensus_tiles';
+  const configuredTypes = new Set<PollenType>(ctx.config.pollen_types ?? ALL_POLLEN_TYPES);
+
+  const availableSources = detectAvailableSources(ctx.hass);
+  const availableTypes = detectAvailableTypes(ctx.hass, source);
+
+  const toggleRow = html`
+    <div class="section-order-sub">
+      <input
+        type="checkbox"
+        id="show-pollen"
+        ?checked=${showPollen}
+        @change=${(e: Event) =>
+          ctx.onToggleChange('show_pollen', (e.target as HTMLInputElement).checked, false)}
+      />
+      <label for="show-pollen">${localize('editor.show_pollen') || 'Show pollen card'}</label>
+    </div>
+    <div class="description">${localize('editor.show_pollen_desc') || ''}</div>
+  `;
+
+  if (!showPollen) return toggleRow;
+
+  return html`
+    ${toggleRow}
+    <div class="section-order-sub" style="flex-wrap: wrap;">
+      <label for="pollen-source">${localize('editor.pollen_source') || 'Pollen source'}</label>
+      <select
+        id="pollen-source"
+        .value=${source}
+        @change=${(e: Event) =>
+          ctx.onSetPollenSource((e.target as HTMLSelectElement).value as PollenSource)}
+      >
+        ${availableSources.map(
+          (s) => html`
+            <option value=${s} ?selected=${source === s}>
+              ${localize(`editor.pollen_source_${s}`) || s}
+            </option>
+          `,
+        )}
+      </select>
+    </div>
+    <div class="description">${localize('editor.pollen_source_desc') || ''}</div>
+    <div class="section-order-sub" style="flex-wrap: wrap;">
+      <label for="pollen-presentation">
+        ${localize('editor.pollen_presentation') || 'Pollen layout'}
+      </label>
+      <select
+        id="pollen-presentation"
+        .value=${presentation}
+        @change=${(e: Event) =>
+          ctx.onSetPollenPresentation(
+            (e.target as HTMLSelectElement).value as PollenPresentation,
+          )}
+      >
+        ${(['consensus_tiles', 'severity_chips', 'raw_grid'] as const).map(
+          (p) => html`
+            <option value=${p} ?selected=${presentation === p}>
+              ${localize(`editor.pollen_presentation_${p}`) || p}
+            </option>
+          `,
+        )}
+      </select>
+    </div>
+    <div class="section-order-sub" style="display: block;">
+      <label style="display: block; margin-bottom: 4px;">
+        ${localize('editor.pollen_types') || 'Pollen types'}
+      </label>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+        ${availableTypes.map(
+          (t) => html`
+            <label
+              class="pollen-chip"
+              style="display: inline-flex; align-items: center; gap: 4px;
+                padding: 4px 10px; border-radius: 999px;
+                background: var(--secondary-background-color); cursor: pointer;
+                font-size: 13px;"
+            >
+              <input
+                type="checkbox"
+                ?checked=${configuredTypes.has(t)}
+                @change=${(e: Event) =>
+                  ctx.onTogglePollenType(t, (e.target as HTMLInputElement).checked)}
+              />
+              <span>${localize(`editor.pollen_type_${t}`) || t}</span>
+            </label>
+          `,
+        )}
+      </div>
+      <div class="description">${localize('editor.pollen_types_desc') || ''}</div>
+    </div>
+    <div class="section-order-sub">
+      <input
+        type="checkbox"
+        id="show-pollen-badges"
+        ?checked=${showPollenBadges}
+        @change=${(e: Event) =>
+          ctx.onToggleChange(
+            'show_pollen_badges',
+            (e.target as HTMLInputElement).checked,
+            false,
+          )}
+      />
+      <label for="show-pollen-badges">
+        ${localize('editor.show_pollen_badges') || 'Pollen badges on weather card'}
+      </label>
+    </div>
+    <div class="description">${localize('editor.show_pollen_badges_desc') || ''}</div>
+  `;
 }
 
 function renderEnergySub(

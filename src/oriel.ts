@@ -63,6 +63,7 @@ const modulesPromise = Promise.all([
   import('./cards/NotificationCard'),
   import('./cards/SparklineCard'),
   import('./cards/RoutinesCard'),
+  import('./cards/PollenCard'),
   import('./cards/VoiceFabCard'),
   import('./features/StickyLockFeature'),
   import('./features/CostOverlayFeature'),

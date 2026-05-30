@@ -593,6 +593,36 @@ export interface OrielConfig {
    * if fresh. Never blanks the value. Default: false.
    */
   mark_stale_in_rooms?: boolean;
+  /**
+   * Render a pollen sub-card inside the weather section, sourced from the
+   * PollenWatch HACS integration. Auto-hides when no `sensor.pollenwatch_*`
+   * entities exist. Default: false (opt-in).
+   */
+  show_pollen?: boolean;
+  /**
+   * Which PollenWatch sub-source feeds the card. `analytics` (default) is
+   * the cross-source consensus (none/low/medium/high enum) — the cleanest
+   * for tile colouring. The raw-data sources surface integration-specific
+   * scales (grains/m³ for `open_meteo`, 0–4 for `polleninformation`, 0–5
+   * for `google`).
+   */
+  pollen_source?: PollenSource;
+  /**
+   * Which pollen types to render. Defaults to whatever the integration
+   * exposes for the chosen source (auto-detected). Unknown values are
+   * silently dropped.
+   */
+  pollen_types?: PollenType[];
+  /** Visual layout of the pollen sub-card. */
+  pollen_presentation?: PollenPresentation;
+  /**
+   * Render compact pollen badges in the weather section heading for
+   * pollens whose current consensus is medium or high. Auto-hides when no
+   * pollen is active. Always uses the analytics consensus regardless of
+   * `pollen_source` (the consensus is the trustworthy "is it actually
+   * bad?" signal). Default: false.
+   */
+  show_pollen_badges?: boolean;
   show_now_playing_badge?: boolean; // default: false (auto-hides when nothing's playing)
   show_vacuums_section?: boolean; // default: false (auto-hides without vacuum/mower)
   show_sun_badge?: boolean; // default: false (requires HA sun integration / sun.sun entity)
@@ -872,6 +902,55 @@ export type WeatherPresentation =
  * the editor when the matching HACS plugin is installed.
  */
 export type EnergyPresentation = 'distribution' | 'none' | (string & {});
+
+// -- Pollen (PollenWatch integration) ---------------------------------
+
+/**
+ * The six pollen types PollenWatch tracks across its three data sources.
+ * Matches the suffix of the integration's sensor object_ids
+ * (e.g. `sensor.pollenwatch_open_meteo_grass`).
+ */
+export type PollenType =
+  | 'alder'
+  | 'birch'
+  | 'grass'
+  | 'mugwort'
+  | 'olive'
+  | 'ragweed';
+
+export const ALL_POLLEN_TYPES: PollenType[] = [
+  'alder',
+  'birch',
+  'grass',
+  'mugwort',
+  'olive',
+  'ragweed',
+];
+
+/**
+ * PollenWatch sub-source. `analytics` is the cross-source consensus enum
+ * (`none`/`low`/`medium`/`high`) and is the default — it produces a clean
+ * severity colouring without per-source scale gymnastics. The other three
+ * surface raw measurements from the underlying providers.
+ */
+export type PollenSource =
+  | 'analytics'
+  | 'open_meteo'
+  | 'polleninformation'
+  | 'google';
+
+export const ALL_POLLEN_SOURCES: PollenSource[] = [
+  'analytics',
+  'open_meteo',
+  'polleninformation',
+  'google',
+];
+
+/** Visual layout of the pollen sub-card. */
+export type PollenPresentation =
+  | 'consensus_tiles'
+  | 'severity_chips'
+  | 'raw_grid';
 
 // -- Weather Sensors --------------------------------------------------
 

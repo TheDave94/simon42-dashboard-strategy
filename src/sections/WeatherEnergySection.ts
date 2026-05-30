@@ -6,9 +6,25 @@
 // ====================================================================
 
 import type { LovelaceCardConfig, LovelaceSectionConfig } from '../types/lovelace';
-import type { WeatherPresentation, WeatherSensorConfig } from '../types/strategy';
+import type { HomeAssistant } from '../types/homeassistant';
+import type {
+  PollenPresentation,
+  PollenSource,
+  PollenType,
+  WeatherPresentation,
+  WeatherSensorConfig,
+} from '../types/strategy';
 import { localize } from '../utils/localize';
 import { findKnownCard, isCardInstalled } from '../utils/section-card-registry';
+import {
+  detectPollenwatchInstalled,
+  isActivePollen,
+  pollenIcon,
+  pollenLevel,
+  pollenSensorId,
+  pollenSeverityColor,
+  resolvePollenTypes,
+} from '../utils/pollen';
 
 // Entity ids follow `domain.object_id` where each part is lowercase
 // letters/digits/underscores. Anything else is a malformed config value
@@ -155,6 +171,75 @@ function buildPresentationCard(
  * Legacy `showForecastCard=false` is honoured when `presentation` is left
  * undefined — it maps to `none`. Any explicit presentation overrides.
  */
+export interface PollenSectionOptions {
+  show: boolean;
+  source: PollenSource;
+  types?: PollenType[];
+  presentation: PollenPresentation;
+  showBadges: boolean;
+}
+
+/**
+ * Build the pollen sub-card from the configured (source, types,
+ * presentation). Returns null when pollen is disabled, the integration
+ * isn't installed, or no types resolve against the hass instance.
+ *
+ * Detection lives here so the section author doesn't need to know which
+ * helpers gate the card — passing `hass` + `opts` is enough.
+ */
+function buildPollenCard(
+  hass: HomeAssistant | undefined,
+  opts: PollenSectionOptions | undefined,
+): LovelaceCardConfig | null {
+  if (!hass || !opts || !opts.show) return null;
+  if (!detectPollenwatchInstalled(hass)) return null;
+  const types = resolvePollenTypes(hass, opts.source, opts.types);
+  if (types.length === 0) return null;
+  return {
+    type: 'custom:oriel-pollen-card',
+    source: opts.source,
+    types,
+    presentation: opts.presentation,
+  };
+}
+
+/**
+ * Build heading badges for every pollen type whose analytics consensus
+ * is currently "active" (medium or high). Always reads from
+ * `analytics_<type>_consensus` — the consensus is the trustworthy
+ * source-of-truth even when the user chose a raw-data source for the
+ * card. Returns an empty array when none qualify, so the caller can
+ * skip the heading.badges field entirely.
+ */
+function buildPollenBadges(
+  hass: HomeAssistant | undefined,
+  opts: PollenSectionOptions | undefined,
+): Array<Record<string, unknown>> {
+  if (!hass || !opts || !opts.showBadges) return [];
+  if (!detectPollenwatchInstalled(hass)) return [];
+  // Badges always use analytics (consensus enum). User's configured
+  // pollen_types still gates which pollens are eligible.
+  const types = resolvePollenTypes(hass, 'analytics', opts.types);
+  const badges: Array<Record<string, unknown>> = [];
+  for (const type of types) {
+    const id = pollenSensorId('analytics', type);
+    const state = hass.states[id];
+    const level = pollenLevel('analytics', state);
+    if (!isActivePollen(level)) continue;
+    const label = localize(`editor.pollen_type_${type}`) || type;
+    badges.push({
+      type: 'entity',
+      entity: id,
+      name: label,
+      icon: pollenIcon(type),
+      color: pollenSeverityColor(level),
+      show_state: true,
+      tap_action: { action: 'more-info' },
+    });
+  }
+  return badges;
+}
+
 export function createWeatherSection(
   weatherEntity: string | null,
   showWeather: boolean,
@@ -162,6 +247,8 @@ export function createWeatherSection(
   weatherSensors: WeatherSensorConfig[] = [],
   presentation?: WeatherPresentation,
   hideHeading: boolean = false,
+  hass?: HomeAssistant,
+  pollen?: PollenSectionOptions,
 ): LovelaceSectionConfig | null {
   if (!weatherEntity || !showWeather) return null;
 
@@ -169,13 +256,18 @@ export function createWeatherSection(
     presentation ?? (showForecastCard ? 'forecast_daily' : 'none');
 
   const cards: LovelaceCardConfig[] = [];
+  const pollenBadges = buildPollenBadges(hass, pollen);
   if (!hideHeading) {
-    cards.push({
+    const heading: LovelaceCardConfig = {
       type: 'heading',
       heading: localize('sections.weather'),
       heading_style: 'title',
       icon: 'mdi:weather-partly-cloudy',
-    });
+    };
+    if (pollenBadges.length > 0) {
+      (heading as { badges?: unknown[] }).badges = pollenBadges;
+    }
+    cards.push(heading);
   }
 
   const sensorRow = buildWeatherSensorRow(weatherSensors);
@@ -183,6 +275,9 @@ export function createWeatherSection(
 
   const card = buildPresentationCard(weatherEntity, resolvedPresentation);
   if (card) cards.push(card);
+
+  const pollenCard = buildPollenCard(hass, pollen);
+  if (pollenCard) cards.push(pollenCard);
 
   return { type: 'grid', cards };
 }
